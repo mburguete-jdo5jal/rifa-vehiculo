@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifa Vehículo 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:#0a0a0f; --surface:#13131a; --surface2:#1c1c28;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#f0eeff; --muted:#7b7a9a;
+  --accent:#7c6af5; --accent2:#5ee8b0; --accent3:#f5a44a; --danger:#f55a5a;
+  --font-head:'Syne',sans-serif; --font-body:'DM Sans',sans-serif;
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.view{display:none;flex:1;flex-direction:column;}
+.view.active{display:flex;}
+
+/* LOGIN */
+.login-screen{display:none;position:fixed;inset:0;z-index:500;background:var(--bg);align-items:center;justify-content:center;padding:24px;}
+.login-screen.open{display:flex;}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px 24px;width:100%;max-width:360px;}
+.login-logo{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.login-error{background:rgba(245,90,90,0.12);border:1px solid rgba(245,90,90,0.3);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--danger);margin-bottom:12px;display:none;}
+.login-error.show{display:block;}
+.login-blocked{background:rgba(245,90,90,0.18);border:1px solid rgba(245,90,90,0.4);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--danger);text-align:center;display:none;}
+.login-blocked.show{display:block;}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 10px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-head);font-size:15px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.nav-right{display:flex;align-items:center;gap:4px;}
+.nav-tabs{display:flex;gap:2px;flex-wrap:wrap;}
+.nav-tab{font-family:var(--font-body);font-size:11px;font-weight:500;padding:5px 9px;border-radius:20px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.nav-tab.active{background:var(--accent);color:#fff;}
+.nav-tab:hover:not(.active){color:var(--text);background:var(--surface2);}
+.btn-logout{font-size:11px;padding:5px 9px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;display:none;white-space:nowrap;}
+.btn-logout.visible{display:block;}
+.btn-logout:hover{color:var(--danger);border-color:var(--danger);}
+
+.scroll-area{flex:1;overflow-y:auto;padding:20px 16px 32px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card-title{font-family:var(--font-head);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat-box{background:var(--surface2);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;border:1px solid var(--border);}
+.stat-num{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--accent);line-height:1;}
+.stat-num.green{color:var(--accent2);}
+.stat-num.amber{color:var(--accent3);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:4px;}
+
+.progress-wrap{margin-bottom:16px;}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.5s ease;}
+
+.boleto-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:6px;border:1px solid var(--border);transition:border-color 0.2s;cursor:pointer;}
+.boleto-row:hover{border-color:var(--accent);}
+.boleto-badge{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--accent);width:44px;height:44px;background:rgba(124,106,245,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.boleto-info{flex:1;min-width:0;}
+.boleto-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.boleto-meta{font-size:11px;color:var(--muted);}
+.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;flex-shrink:0;}
+.badge-pagado{background:rgba(94,232,176,0.15);color:var(--accent2);}
+.badge-pendiente{background:rgba(245,164,74,0.15);color:var(--accent3);}
+
+.btn{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6a59e0;}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+.btn-secondary:hover{border-color:var(--accent);}
+.btn-success{background:rgba(94,232,176,0.15);color:var(--accent2);border:1px solid rgba(94,232,176,0.3);}
+.btn+.btn{margin-top:8px;}
+.btn-sm{padding:7px 14px;width:auto;font-size:12px;}
+
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:block;}
+.form-input{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--accent);}
+.form-input::placeholder{color:var(--muted);}
+select.form-input option{background:var(--surface2);}
+textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:200;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:16px;}
+
+.ticket-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:20px;margin-bottom:12px;overflow:hidden;}
+.ticket-header{background:linear-gradient(135deg,var(--accent),#4a3cb5);padding:20px 20px 16px;text-align:center;}
+.ticket-event{font-size:11px;font-weight:500;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;}
+.ticket-title{font-family:var(--font-head);font-size:22px;font-weight:800;margin:4px 0;}
+.ticket-date{font-size:12px;color:rgba(255,255,255,0.7);}
+.ticket-divider{height:1px;background:var(--border);position:relative;}
+.ticket-divider::before,.ticket-divider::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;background:var(--bg);border-radius:50%;}
+.ticket-divider::before{left:-10px;}.ticket-divider::after{right:-10px;}
+.ticket-body{padding:20px;text-align:center;}
+.ticket-num-label{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.ticket-num{font-family:var(--font-head);font-size:56px;font-weight:800;letter-spacing:8px;color:var(--accent);line-height:1;margin-bottom:4px;}
+.ticket-holder{font-size:15px;font-weight:500;margin-bottom:16px;}
+.qr-container{background:#fff;border-radius:12px;padding:12px;display:inline-block;margin-bottom:12px;}
+.ticket-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;background:rgba(94,232,176,0.15);color:var(--accent2);border:1px solid rgba(94,232,176,0.3);}
+.ticket-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.ticket-footer-lbl{font-size:10px;color:var(--muted);}
+.ticket-footer-val{font-size:12px;font-weight:500;}
+
+.search-input{width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:30px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:12px;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+
+/* SORTEO */
+.countdown-big{text-align:center;padding:24px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;}
+.countdown-title{font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
+.countdown-units{display:flex;gap:8px;justify-content:center;align-items:center;}
+.countdown-unit{text-align:center;}
+.countdown-num{font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent);line-height:1;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;min-width:60px;display:block;}
+.countdown-lbl{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;}
+.countdown-sep{font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--muted);padding-bottom:16px;}
+.drum-machine{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;text-align:center;margin-bottom:12px;}
+.drum-display{font-family:var(--font-head);font-size:64px;font-weight:800;letter-spacing:10px;color:var(--muted);min-height:80px;display:flex;align-items:center;justify-content:center;}
+.drum-display.spinning{animation:spin-nums 0.08s infinite;}
+.drum-display.winner{color:var(--accent2);animation:winner-glow 1s ease infinite alternate;}
+@keyframes spin-nums{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes winner-glow{from{text-shadow:0 0 0px var(--accent2)}to{text-shadow:0 0 30px var(--accent2)}}
+.drum-sub{font-size:13px;color:var(--muted);margin-top:8px;}
+.drum-sub.winner-name{color:var(--accent2);font-size:16px;font-weight:500;}
+.sorteo-info{display:flex;justify-content:space-between;margin-bottom:16px;}
+.sorteo-info-item{text-align:center;}
+.sorteo-info-num{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--text);}
+.sorteo-info-lbl{font-size:10px;color:var(--muted);}
+.winner-card{background:rgba(94,232,176,0.08);border:1px solid rgba(94,232,176,0.3);border-radius:var(--radius);padding:20px;text-align:center;display:none;margin-bottom:12px;}
+.winner-card.show{display:block;animation:fadeIn 0.5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.winner-label{font-size:11px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.winner-boleto{font-family:var(--font-head);font-size:48px;font-weight:800;color:var(--accent2);line-height:1;}
+.winner-person{font-size:16px;font-weight:500;margin-top:4px;}
+.winner-tel{font-size:12px;color:var(--muted);}
+/* Sorteo: botón admin-only */
+.sorteo-admin-only{display:none;}
+.sorteo-admin-only.visible{display:block;}
+
+.inner-tabs{display:flex;gap:4px;margin-bottom:12px;}
+.inner-tab{flex:1;padding:8px;font-size:11px;font-weight:500;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.inner-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.inner-panel{display:none;}
+.inner-panel.active{display:block;}
+
+.empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;}
+.empty-icon{font-size:32px;margin-bottom:8px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent2);color:#0a0a0f;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;transition:transform 0.3s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.hint-box{background:rgba(245,164,74,0.08);border:1px solid rgba(245,164,74,0.25);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--accent3);margin-bottom:12px;display:none;}
+.hint-box.show{display:block;}
+
+/* GALERÍA */
+.galeria-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.galeria-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:opacity 0.2s;}
+.galeria-img:hover{opacity:0.85;}
+.galeria-empty-single{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:32px;text-align:center;font-size:12px;color:var(--muted);grid-column:span 2;}
+.upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:12px;}
+.upload-area:hover{border-color:var(--accent);}
+.upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-label{font-size:13px;color:var(--muted);}
+.upload-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+/* Advertencia de almacenamiento */
+.storage-bar{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted);}
+.storage-fill-wrap{height:4px;background:var(--border2);border-radius:2px;margin-top:6px;overflow:hidden;}
+.storage-fill{height:100%;border-radius:2px;transition:width 0.3s;}
+#file-input{display:none;}
+
+/* Lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;align-items:center;justify-content:center;padding:20px;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:var(--radius-sm);object-fit:contain;}
+.lightbox-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* FAQ */
+.faq-item{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden;}
+.faq-question{padding:14px 16px;font-size:13px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background 0.2s;}
+.faq-question:hover{background:var(--surface2);}
+.faq-arrow{color:var(--muted);font-size:12px;transition:transform 0.2s;flex-shrink:0;}
+.faq-answer{padding:0 16px;max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s ease;font-size:13px;color:var(--muted);line-height:1.7;}
+.faq-item.open .faq-answer{max-height:300px;padding:0 16px 14px;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-edit-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;}
+.faq-edit-controls{display:flex;gap:6px;margin-top:8px;}
+
+/* TRANSPARENCIA / PRIVACIDAD */
+.proceso-content{font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.privacidad-text{font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+
+/* PAGE TABS */
+.page-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
+.page-tab{flex:1;min-width:80px;padding:9px 6px;font-size:11px;font-weight:500;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-align:center;}
+.page-tab.active{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+.page-tab:hover:not(.active){color:var(--text);}
+.page-section{display:none;}
+.page-section.active{display:block;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">RIFA 2025</div>
+    <div class="login-sub">Acceso exclusivo para administrador</div>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-blocked" id="login-blocked">Acceso bloqueado por múltiples intentos fallidos.<br>Recarga la página para reintentar.</div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-input" id="login-pass" type="password" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="btn btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="cancelarLogin()">Cancelar</button>
+  </div>
+</div>
+
+<div class="app">
+  <nav>
+    <div class="nav-logo" id="nav-title">RIFA 2025</div>
+    <div class="nav-right">
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="goView('info')">Info</button>
+        <button class="nav-tab" onclick="goView('boleto')">Boleto</button>
+        <button class="nav-tab" onclick="goView('sorteo')">Sorteo</button>
+        <button class="nav-tab" onclick="goView('admin')">Admin</button>
+      </div>
+      <button class="btn-logout" id="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <!-- ====== VISTA INFO ====== -->
+  <div id="view-info" class="view active">
+    <div class="scroll-area">
+      <div class="card" style="background:linear-gradient(135deg,rgba(124,106,245,0.15),rgba(94,232,176,0.08));border-color:rgba(124,106,245,0.3);text-align:center;padding:24px 16px;">
+        <div id="hero-evento" style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;"></div>
+        <div id="hero-premio" style="font-family:var(--font-head);font-size:26px;font-weight:800;margin-bottom:4px;"></div>
+        <div style="font-size:13px;color:var(--muted);">Sorteo: <span id="hero-fecha">Por definir</span></div>
+        <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <span style="background:rgba(124,106,245,0.15);color:var(--accent);border:1px solid rgba(124,106,245,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;">$<span id="hero-precio">300</span> por boleto</span>
+          <span style="background:rgba(94,232,176,0.15);color:var(--accent2);border:1px solid rgba(94,232,176,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;"><span id="hero-total">500</span> boletos</span>
+        </div>
+      </div>
+
+      <div class="page-tabs">
+        <button class="page-tab active" onclick="pageTab('galeria')">Fotos</button>
+        <button class="page-tab" onclick="pageTab('proceso')">Transparencia</button>
+        <button class="page-tab" onclick="pageTab('faq')">Preguntas</button>
+        <button class="page-tab" onclick="pageTab('privacidad')">Privacidad</button>
+      </div>
+
+      <div id="sec-galeria" class="page-section active">
+        <div id="galeria-publica" class="galeria-grid"></div>
+        <div style="text-align:center;margin-top:4px;font-size:11px;color:var(--muted);" id="galeria-counter"></div>
+      </div>
+
+      <div id="sec-proceso" class="page-section">
+        <div class="card">
+          <div class="card-title">Proceso del sorteo</div>
+          <div class="proceso-content" id="proceso-publico"></div>
+        </div>
+      </div>
+
+      <div id="sec-faq" class="page-section">
+        <div id="faq-lista-publica"></div>
+        <div class="empty" id="faq-empty" style="display:none;"><div class="empty-icon">💬</div>Sin preguntas agregadas aún</div>
+      </div>
+
+      <div id="sec-privacidad" class="page-section">
+        <div class="card">
+          <div class="card-title">Aviso de privacidad</div>
+          <div class="privacidad-text" id="privacidad-texto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== VISTA BOLETO ====== -->
+  <div id="view-boleto" class="view">
+    <div class="scroll-area">
+      <div style="background:rgba(124,106,245,0.08);border:1px solid rgba(124,106,245,0.25);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:24px;margin-bottom:8px;">🔒</div>
+        <div style="font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:6px;">Consulta tu boleto</div>
+        <div style="font-size:12px;color:var(--muted);">Ingresa tu número y nombre exactamente como fueron registrados</div>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Número de boleto</label>
+          <input class="form-input" id="buscar-num" type="number" min="1" placeholder="Ej: 47">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tu nombre completo</label>
+          <input class="form-input" id="buscar-nombre" placeholder="Ej: Juan García López"
+            onkeydown="if(event.key==='Enter') buscarBoleto()">
+        </div>
+        <div class="hint-box" id="hint-box">Nombre o número incorrecto. Verifica con quien te vendió el boleto.</div>
+        <button class="btn btn-primary" onclick="buscarBoleto()">Ver mi boleto</button>
+      </div>
+      <div id="boleto-result"></div>
+    </div>
+  </div>
+
+  <!-- ====== VISTA SORTEO ====== -->
+  <div id="view-sorteo" class="view">
+    <div class="scroll-area">
+      <div class="countdown-big">
+        <div class="countdown-title">Tiempo para el sorteo</div>
+        <div class="countdown-units">
+          <div class="countdown-unit"><span class="countdown-num" id="cd-dias">--</span><div class="countdown-lbl">Días</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-hrs">--</span><div class="countdown-lbl">Horas</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-min">--</span><div class="countdown-lbl">Min</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-seg">--</span><div class="countdown-lbl">Seg</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sorteo-info">
+          <div class="sorteo-info-item"><div class="sorteo-info-num" id="s-fecha">--</div><div class="sorteo-info-lbl">Fecha</div></div>
+          <div class="sorteo-info-item"><div class="sorteo-info-num" id="s-participantes">0</div><div class="sorteo-info-lbl">Boletos pagados</div></div>
+          <div class="sorteo-info-item"><div class="sorteo-info-num" id="s-premio">—</div><div class="sorteo-info-lbl">Premio</div></div>
+        </div>
+      </div>
+      <div class="winner-card" id="winner-card">
+        <div class="winner-label">Boleto ganador</div>
+        <div class="winner-boleto" id="w-num">---</div>
+        <div class="winner-person" id="w-name">—</div>
+        <div class="winner-tel" id="w-tel"></div>
+      </div>
+      <div class="drum-machine">
+        <div class="drum-display" id="drum-display">???</div>
+        <div class="drum-sub" id="drum-sub">Pendiente de realizar</div>
+      </div>
+      <!-- Solo visible para admin: #6 corregido -->
+      <div class="sorteo-admin-only" id="sorteo-btns">
+        <button class="btn btn-primary" id="btn-sorteo" onclick="realizarSorteo()">Realizar sorteo ahora</button>
+        <button class="btn btn-secondary" style="margin-top:8px;" onclick="resetSorteo()">Reiniciar sorteo</button>
+      </div>
+      <div id="sorteo-msg-publico" style="text-align:center;font-size:12px;color:var(--muted);padding:8px 0;"></div>
+    </div>
+  </div>
+
+  <!-- ====== VISTA ADMIN ====== -->
+  <div id="view-admin" class="view">
+    <div class="scroll-area">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num" id="stat-vendidos">0</div><div class="stat-lbl">Vendidos</div></div>
+        <div class="stat-box"><div class="stat-num green" id="stat-libres">500</div><div class="stat-lbl">Libres</div></div>
+        <div class="stat-box"><div class="stat-num amber" id="stat-recaudado">$0</div><div class="stat-lbl">Recaudado</div></div>
+      </div>
+      <div class="progress-wrap card" style="padding:14px;">
+        <div class="progress-label"><span>Avance de ventas</span><span id="pct-label">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="innerTab('lista')">Lista</button>
+        <button class="inner-tab" onclick="innerTab('nuevo')">+ Nuevo</button>
+        <button class="inner-tab" onclick="innerTab('galeria-admin')">Fotos</button>
+        <button class="inner-tab" onclick="innerTab('contenido')">Contenido</button>
+        <button class="inner-tab" onclick="innerTab('config')">Config</button>
+      </div>
+
+      <!-- Lista -->
+      <div id="panel-lista" class="inner-panel active">
+        <input class="search-input" id="search-input" placeholder="Buscar por nombre, número o vendedor..." oninput="renderLista()">
+        <div id="lista-boletos"></div>
+      </div>
+
+      <!-- Nuevo -->
+      <div id="panel-nuevo" class="inner-panel">
+        <div class="card">
+          <div class="card-title">Datos del comprador</div>
+          <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" id="f-nombre" placeholder="Ej: Juan García López"></div>
+          <div class="form-group"><label class="form-label">Teléfono (WhatsApp)</label><input class="form-input" id="f-tel" type="tel" placeholder="3310000000" maxlength="15"></div>
+          <div class="form-group"><label class="form-label">Número de boleto (1–<span id="max-label">500</span>)</label><input class="form-input" id="f-num" type="number" min="1" max="500" placeholder="Ej: 47"></div>
+          <div class="form-group"><label class="form-label">Vendedor</label><input class="form-input" id="f-vendedor" placeholder="Ej: María López"></div>
+          <div class="form-group"><label class="form-label">Forma de pago</label>
+            <select class="form-input" id="f-pago"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option></select></div>
+          <div class="form-group"><label class="form-label">Estado</label>
+            <select class="form-input" id="f-estado"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></div>
+          <button class="btn btn-primary" onclick="registrarBoleto()">Registrar boleto</button>
+        </div>
+      </div>
+
+      <!-- Galería admin -->
+      <div id="panel-galeria-admin" class="inner-panel">
+        <div class="card">
+          <div class="card-title">Imágenes del vehículo</div>
+          <div class="storage-bar" id="storage-bar">
+            <span id="storage-label">Almacenamiento: calculando...</span>
+            <div class="storage-fill-wrap"><div class="storage-fill" id="storage-fill"></div></div>
+          </div>
+          <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📷</div>
+            <div class="upload-label">Toca para subir fotos</div>
+            <div class="upload-sub">JPG, PNG · Máx. 2 MB por imagen · Recomendado: foto desde el celular</div>
+          </div>
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple onchange="subirImagenes(event)">
+          <div id="galeria-admin-grid" class="galeria-grid"></div>
+        </div>
+      </div>
+
+      <!-- Contenido editable -->
+      <div id="panel-contenido" class="inner-panel">
+        <div class="card">
+          <div class="card-title">Preguntas frecuentes</div>
+          <div id="faq-admin-lista"></div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">Nueva pregunta</label>
+            <input class="form-input" id="faq-nueva-p" placeholder="Ej: ¿Cuándo se realiza el sorteo?">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Respuesta</label>
+            <textarea class="form-input" id="faq-nueva-r" placeholder="Escribe la respuesta aquí..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="agregarFaq()">Agregar pregunta</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Texto de transparencia</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Explica cómo funciona la rifa, quién organiza, cómo se realiza el sorteo. Visible para todos.</div>
+          <div class="form-group"><textarea class="form-input" id="proceso-editor" style="min-height:160px;" placeholder="Ej: Esta rifa es organizada por... El sorteo se realizará el..."></textarea></div>
+          <button class="btn btn-primary" onclick="guardarProceso()">Guardar texto de transparencia</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Aviso de privacidad</div>
+          <div class="form-group"><textarea class="form-input" id="privacidad-editor" style="min-height:160px;"></textarea></div>
+          <button class="btn btn-primary" onclick="guardarPrivacidad()">Guardar aviso de privacidad</button>
+        </div>
+      </div>
+
+      <!-- Config -->
+      <div id="panel-config" class="inner-panel">
+        <div class="card">
+          <div class="card-title">Configuración de la rifa</div>
+          <div class="form-group"><label class="form-label">Nombre del evento</label><input class="form-input" id="cfg-nombre"></div>
+          <div class="form-group"><label class="form-label">Premio</label><input class="form-input" id="cfg-premio"></div>
+          <div class="form-group"><label class="form-label">Precio por boleto ($)</label><input class="form-input" id="cfg-precio" type="number"></div>
+          <div class="form-group"><label class="form-label">Total de boletos</label><input class="form-input" id="cfg-total" type="number"></div>
+          <div class="form-group"><label class="form-label">Fecha del sorteo</label><input class="form-input" id="cfg-fecha" type="datetime-local"></div>
+          <div class="form-group">
+            <label class="form-label">Nueva contraseña de administrador (mín. 6 caracteres)</label>
+            <input class="form-input" id="cfg-pass" type="password" placeholder="Dejar en blanco para no cambiar">
+          </div>
+          <button class="btn btn-primary" onclick="guardarConfig()">Guardar configuración</button>
+          <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);" onclick="borrarTodo()">Borrar todos los datos</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle boleto -->
+<div class="modal-overlay" id="modal-detalle" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title-text">Detalle del boleto</div>
+    <div id="modal-content"></div>
+    <button class="btn btn-secondary" onclick="closeModalDirect()" style="margin-top:12px;">Cerrar</button>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="Foto vehículo">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====================================================================
+// UTILIDADES DE SEGURIDAD
+// ====================================================================
+
+// Sanitizar texto para insertar en HTML sin riesgo XSS
+// Corrige problemas #1 y #2 del análisis
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// Hash simple para la contraseña (no reversible desde la UI)
+// Corrige problema #4: contraseña en texto plano
+async function hashPass(pass) {
+  const enc = new TextEncoder().encode(pass + 'rifa_salt_2025');
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// Validar teléfono: solo dígitos, +, espacios y guiones, entre 8 y 15 chars
+// Corrige problema #6
+function validarTel(tel) {
+  return /^[+\d\s\-]{8,15}$/.test(tel);
+}
+
+// ====================================================================
+// ESTADO
+// ====================================================================
+const DEFAULT_PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // 'password' — se reemplaza en primer uso
+let boletos = JSON.parse(localStorage.getItem('rifa_boletos') || '[]');
+let config = JSON.parse(localStorage.getItem('rifa_config') || JSON.stringify({
+  nombre:'Rifa Vehículo 2025', premio:'Vehículo 2024',
+  precio:300, total:500, fecha:'',
+  passHash: null  // null = aún no configurada, usará DEFAULT
+}));
+let ganador = JSON.parse(localStorage.getItem('rifa_ganador') || 'null');
+let imagenes = JSON.parse(localStorage.getItem('rifa_imagenes') || '[]');
+let faqs = JSON.parse(localStorage.getItem('rifa_faqs') || '[]');
+let procesoTexto = localStorage.getItem('rifa_proceso') || '';
+let privacidadTexto = localStorage.getItem('rifa_privacidad') ||
+`AVISO DE PRIVACIDAD
+
+El responsable de la presente rifa recaba los siguientes datos personales de los participantes: nombre completo y número de teléfono.
+
+Finalidad: Dichos datos se utilizan exclusivamente para la administración de los boletos, identificación de participantes y notificación al ganador del sorteo.
+
+Los datos no serán compartidos con terceros ni utilizados para ningún otro fin sin consentimiento del titular.
+
+El participante puede solicitar la corrección o eliminación de sus datos contactando directamente al organizador.`;
+
+let adminLoggedIn = false;
+let loginAttempts = 0;
+const MAX_ATTEMPTS = 5;
+
+function save() {
+  try {
+    localStorage.setItem('rifa_boletos', JSON.stringify(boletos));
+    localStorage.setItem('rifa_config', JSON.stringify(config));
+    localStorage.setItem('rifa_ganador', JSON.stringify(ganador));
+    localStorage.setItem('rifa_faqs', JSON.stringify(faqs));
+    localStorage.setItem('rifa_proceso', procesoTexto);
+    localStorage.setItem('rifa_privacidad', privacidadTexto);
+  } catch(e) {
+    toast('⚠️ Error al guardar: almacenamiento lleno');
+  }
+}
+function saveImages() {
+  try {
+    localStorage.setItem('rifa_imagenes', JSON.stringify(imagenes));
+  } catch(e) {
+    toast('⚠️ Sin espacio para más fotos. Elimina algunas.');
+    return false;
+  }
+  return true;
+}
+
+// ====================================================================
+// LOGIN — corrige #4 (hash) y mejora bloqueo
+// ====================================================================
+function checkAdminTab() { if (!adminLoggedIn) openLogin(); }
+
+function cancelarLogin() {
+  document.getElementById('login-screen').classList.remove('open');
+  // Devolver al tab activo anterior o Info
+  goView('info');
+}
+
+function openLogin() {
+  document.getElementById('login-screen').classList.add('open');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  document.getElementById('login-error').textContent = '';
+  if (loginAttempts >= MAX_ATTEMPTS) {
+    document.getElementById('login-blocked').classList.add('show');
+    document.getElementById('btn-login').disabled = true;
+    document.getElementById('login-pass').disabled = true;
+  }
+}
+
+async function doLogin() {
+  if (loginAttempts >= MAX_ATTEMPTS) return;
+  const pass = document.getElementById('login-pass').value;
+  if (!pass) return;
+
+  const hash = await hashPass(pass);
+  // Primera vez: contraseña por defecto es 'admin1234'
+  const defaultHash = await hashPass('admin1234');
+  const storedHash = config.passHash || defaultHash;
+
+  if (hash === storedHash) {
+    adminLoggedIn = true; loginAttempts = 0;
+    document.getElementById('login-screen').classList.remove('open');
+    document.getElementById('btn-logout').classList.add('visible');
+    updateStats(); renderLista();
+    // Navegar a admin
+    _activateView('admin');
+  } else {
+    loginAttempts++;
+    const r = MAX_ATTEMPTS - loginAttempts;
+    const errEl = document.getElementById('login-error');
+    if (r > 0) {
+      errEl.textContent = `Contraseña incorrecta. ${r} intento(s) restantes.`;
+    } else {
+      errEl.textContent = 'Acceso bloqueado.';
+      document.getElementById('login-blocked').classList.add('show');
+      document.getElementById('btn-login').disabled = true;
+      document.getElementById('login-pass').disabled = true;
+    }
+    errEl.classList.add('show');
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+// Corrige #8: confirmar antes de cerrar sesión
+function logout() {
+  if (!confirm('¿Cerrar sesión de administrador?')) return;
+  adminLoggedIn = false;
+  document.getElementById('btn-logout').classList.remove('visible');
+  // Ocultar botones de sorteo
+  document.getElementById('sorteo-btns').classList.remove('visible');
+  goView('info');
+  toast('Sesión cerrada');
+}
+
+// ====================================================================
+// NAVEGACIÓN
+// ====================================================================
+function goView(v) {
+  if (v === 'admin' && !adminLoggedIn) { checkAdminTab(); return; }
+  _activateView(v);
+}
+
+function _activateView(v) {
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  const idx = {info:0, boleto:1, sorteo:2, admin:3};
+  document.querySelectorAll('.nav-tab')[idx[v]].classList.add('active');
+  if (v === 'admin') { updateStats(); renderLista(); }
+  if (v === 'sorteo') {
+    updateSorteoInfo();
+    // Corrige #7: botones de sorteo solo visibles para admin
+    const btns = document.getElementById('sorteo-btns');
+    const msg = document.getElementById('sorteo-msg-publico');
+    if (adminLoggedIn) {
+      btns.classList.add('visible');
+      msg.textContent = '';
+    } else {
+      btns.classList.remove('visible');
+      msg.textContent = 'El sorteo es realizado por el administrador en la fecha programada.';
+    }
+  }
+  if (v === 'info') { renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad(); updateHero(); }
+}
+
+function pageTab(name) {
+  document.querySelectorAll('.page-tab').forEach((t,i) => {
+    const ns=['galeria','proceso','faq','privacidad'];
+    t.classList.toggle('active', ns[i]===name);
+  });
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+}
+
+function innerTab(name) {
+  const names=['lista','nuevo','galeria-admin','contenido','config'];
+  document.querySelectorAll('.inner-tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name==='config') loadConfig();
+  if (name==='galeria-admin') { renderGaleriaAdmin(); updateStorageBar(); }
+  if (name==='contenido') loadContenido();
+}
+
+// ====================================================================
+// HERO
+// ====================================================================
+function updateHero() {
+  document.getElementById('hero-evento').textContent = config.nombre;
+  document.getElementById('hero-premio').textContent = config.premio;
+  document.getElementById('hero-precio').textContent = Number(config.precio).toLocaleString('es-MX');
+  document.getElementById('hero-total').textContent = config.total;
+  document.getElementById('hero-fecha').textContent = config.fecha
+    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
+    : 'Por definir';
+  // Actualizar título en nav también
+  document.getElementById('nav-title').textContent = config.nombre || 'RIFA 2025';
+}
+
+// ====================================================================
+// STATS
+// ====================================================================
+function updateStats() {
+  const libres = Math.max(0, config.total - boletos.length);
+  const recaudado = boletos.filter(b=>b.estado==='Pagado').length * config.precio;
+  document.getElementById('stat-vendidos').textContent = boletos.length;
+  document.getElementById('stat-libres').textContent = libres;
+  document.getElementById('stat-recaudado').textContent = '$' + recaudado.toLocaleString('es-MX');
+  const pct = config.total > 0 ? Math.round((boletos.length/config.total)*100) : 0;
+  document.getElementById('pct-label').textContent = pct+'%';
+  document.getElementById('progress-fill').style.width = pct+'%';
+  const ml=document.getElementById('max-label'); if(ml) ml.textContent=config.total;
+}
+
+// ====================================================================
+// LISTA — corrige #1 (XSS): usa esc() en todos los campos de usuario
+// ====================================================================
+function renderLista() {
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  const filtered = boletos.filter(b =>
+    b.nombre.toLowerCase().includes(q) ||
+    String(b.numero).includes(q) ||
+    (b.vendedor||'').toLowerCase().includes(q)
+  ).sort((a,b)=>a.numero-b.numero);
+  const el = document.getElementById('lista-boletos');
+  if (!filtered.length) {
+    el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div>Sin boletos registrados</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(b => `
+    <div class="boleto-row" onclick="verDetalle(${b.numero})">
+      <div class="boleto-badge">${String(b.numero).padStart(3,'0')}</div>
+      <div class="boleto-info">
+        <div class="boleto-name">${esc(b.nombre)}</div>
+        <div class="boleto-meta">${esc(b.pago)} · Vendedor: ${esc(b.vendedor||'—')}</div>
+      </div>
+      <span class="badge badge-${b.estado==='Pagado'?'pagado':'pendiente'}">${esc(b.estado)}</span>
+    </div>`).join('');
+}
+
+// ====================================================================
+// REGISTRAR — corrige #6 (validación teléfono)
+// ====================================================================
+function registrarBoleto() {
+  const nombre  = document.getElementById('f-nombre').value.trim();
+  const tel     = document.getElementById('f-tel').value.trim();
+  const num     = parseInt(document.getElementById('f-num').value);
+  const vendedor= document.getElementById('f-vendedor').value.trim();
+  const pago    = document.getElementById('f-pago').value;
+  const estado  = document.getElementById('f-estado').value;
+
+  if (!nombre) return toast('Ingresa el nombre del comprador');
+  if (!tel) return toast('Ingresa el teléfono');
+  if (!validarTel(tel)) return toast('Teléfono inválido (solo números, +, guiones)');
+  if (!num || num<1 || num>config.total) return toast('Número de boleto inválido');
+  if (boletos.find(b=>b.numero===num)) return toast('Ese número ya está registrado');
+
+  boletos.push({numero:num, nombre, tel, vendedor, pago, estado, fecha:new Date().toISOString()});
+  save(); updateStats(); renderLista();
+  ['f-nombre','f-tel','f-num','f-vendedor'].forEach(id=>document.getElementById(id).value='');
+  toast('Boleto #'+String(num).padStart(3,'0')+' registrado');
+  innerTab('lista');
+}
+
+// ====================================================================
+// DETALLE — corrige #1 (XSS): usa esc() en value de inputs
+// ====================================================================
+function verDetalle(num) {
+  const b = boletos.find(x=>x.numero===num); if (!b) return;
+  // Usar .value con textContent-safe para los inputs es suficiente;
+  // los value de input no ejecutan JS, pero igualmente escapamos
+  // para evitar romper el HTML del atributo value="..."
+  document.getElementById('modal-content').innerHTML = `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Boleto #${String(b.numero).padStart(3,'0')}</div>
+    <div class="form-group"><label class="form-label">Nombre</label>
+      <input class="form-input" id="edit-nombre" value="${esc(b.nombre)}"></div>
+    <div class="form-group"><label class="form-label">Teléfono</label>
+      <input class="form-input" id="edit-tel" value="${esc(b.tel)}" maxlength="15"></div>
+    <div class="form-group"><label class="form-label">Vendedor</label>
+      <input class="form-input" id="edit-vendedor" value="${esc(b.vendedor||'')}"></div>
+    <div class="form-group"><label class="form-label">Forma de pago</label>
+      <select class="form-input" id="edit-pago">
+        <option ${b.pago==='Efectivo'?'selected':''}>Efectivo</option>
+        <option ${b.pago==='Transferencia'?'selected':''}>Transferencia</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Estado</label>
+      <select class="form-input" id="edit-estado">
+        <option ${b.estado==='Pagado'?'selected':''}>Pagado</option>
+        <option ${b.estado==='Pendiente'?'selected':''}>Pendiente</option>
+      </select></div>
+    <button class="btn btn-success" onclick="saveEdit(${num})">Guardar cambios</button>
+    <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);"
+      onclick="eliminar(${num})">Eliminar boleto</button>`;
+  document.getElementById('modal-detalle').classList.add('open');
+}
+
+function saveEdit(num) {
+  const b = boletos.find(x=>x.numero===num); if (!b) return;
+  const tel = document.getElementById('edit-tel').value.trim();
+  if (!validarTel(tel)) return toast('Teléfono inválido');
+  b.nombre   = document.getElementById('edit-nombre').value.trim();
+  b.tel      = tel;
+  b.vendedor = document.getElementById('edit-vendedor').value.trim();
+  b.pago     = document.getElementById('edit-pago').value;
+  b.estado   = document.getElementById('edit-estado').value;
+  save(); updateStats(); renderLista(); closeModalDirect(); toast('Boleto actualizado');
+}
+
+function eliminar(num) {
+  if (!confirm('¿Eliminar boleto #'+num+'?')) return;
+  boletos=boletos.filter(x=>x.numero!==num);
+  save(); updateStats(); renderLista(); closeModalDirect(); toast('Boleto eliminado');
+}
+function closeModal(e){if(e.target===e.currentTarget)closeModalDirect();}
+function closeModalDirect(){document.getElementById('modal-detalle').classList.remove('open');}
+
+// ====================================================================
+// CONFIG — corrige #4: guardar passHash, no texto plano
+// ====================================================================
+function loadConfig() {
+  document.getElementById('cfg-nombre').value = config.nombre;
+  document.getElementById('cfg-premio').value = config.premio;
+  document.getElementById('cfg-precio').value = config.precio;
+  document.getElementById('cfg-total').value  = config.total;
+  document.getElementById('cfg-fecha').value  = config.fecha;
+  document.getElementById('cfg-pass').value   = '';
+}
+
+async function guardarConfig() {
+  config.nombre  = document.getElementById('cfg-nombre').value.trim() || config.nombre;
+  config.premio  = document.getElementById('cfg-premio').value.trim() || config.premio;
+  config.precio  = parseFloat(document.getElementById('cfg-precio').value) || config.precio;
+  config.total   = parseInt(document.getElementById('cfg-total').value)   || config.total;
+  config.fecha   = document.getElementById('cfg-fecha').value;
+
+  const np = document.getElementById('cfg-pass').value.trim();
+  if (np.length > 0 && np.length < 6) {
+    return toast('La contraseña debe tener al menos 6 caracteres');
+  }
+  if (np.length >= 6) {
+    config.passHash = await hashPass(np);
+    toast('Configuración y contraseña guardadas');
+  } else {
+    toast('Configuración guardada');
+  }
+  save(); updateStats(); updateHero();
+}
+
+function borrarTodo() {
+  if (!confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) return;
+  boletos=[]; ganador=null; imagenes=[]; faqs=[]; procesoTexto='';
+  save(); saveImages(); updateStats(); renderLista(); toast('Datos borrados');
+}
+
+// ====================================================================
+// GALERÍA — corrige #5: indicador de almacenamiento
+// ====================================================================
+function updateStorageBar() {
+  try {
+    let total = 0;
+    for (let k in localStorage) {
+      if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length * 2);
+    }
+    const pct = Math.min(100, Math.round((total / (5*1024*1024)) * 100));
+    const kb = Math.round(total / 1024);
+    document.getElementById('storage-label').textContent =
+      `Almacenamiento usado: ~${kb} KB de ~5,120 KB (${pct}%)`;
+    const fill = document.getElementById('storage-fill');
+    fill.style.width = pct+'%';
+    fill.style.background = pct > 80 ? 'var(--danger)' : pct > 60 ? 'var(--accent3)' : 'var(--accent2)';
+    if (pct > 85) {
+      document.getElementById('storage-label').style.color = 'var(--accent3)';
+    }
+  } catch(e) {}
+}
+
+function subirImagenes(e) {
+  const files = Array.from(e.target.files);
+  let procesados = 0;
+  files.forEach(file => {
+    if (file.size > 2*1024*1024) { toast('Imagen muy grande: '+file.name+' (máx 2 MB)'); procesados++; return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      imagenes.push(ev.target.result);
+      procesados++;
+      if (procesados === files.length) {
+        const ok = saveImages();
+        if (!ok) { imagenes.pop(); }
+        else { renderGaleriaAdmin(); renderGaleria(); updateStorageBar(); toast('Foto(s) agregada(s)'); }
+      }
+    };
+    reader.onerror = () => { procesados++; toast('Error leyendo: '+file.name); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+// Corrige #9: un solo bloque vacío en galería pública
+function renderGaleria() {
+  const el = document.getElementById('galeria-publica');
+  const counter = document.getElementById('galeria-counter');
+  if (!imagenes.length) {
+    el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>';
+    counter.textContent='';
+    return;
+  }
+  el.innerHTML = imagenes.map(src =>
+    `<img class="galeria-img" src="${src}" alt="Vehículo" onclick="openLightbox(this.src)">`
+  ).join('');
+  counter.textContent = imagenes.length+' foto(s) · Toca para ampliar';
+}
+
+function renderGaleriaAdmin() {
+  const el = document.getElementById('galeria-admin-grid');
+  if (!imagenes.length) {
+    el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>'; return;
+  }
+  el.innerHTML = imagenes.map((src,i) => `
+    <div style="position:relative;">
+      <img class="galeria-img" src="${src}" alt="Foto ${i+1}" onclick="openLightbox(this.src)">
+      <button onclick="eliminarImagen(${i})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;line-height:1;">✕</button>
+    </div>`).join('');
+}
+
+function eliminarImagen(i) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  imagenes.splice(i,1); saveImages(); renderGaleriaAdmin(); renderGaleria(); updateStorageBar(); toast('Foto eliminada');
+}
+function openLightbox(src){ document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+
+// ====================================================================
+// FAQ — corrige #2 (XSS): usa esc() en p y r
+// ====================================================================
+function loadContenido() {
+  renderFaqAdmin();
+  document.getElementById('proceso-editor').value = procesoTexto;
+  document.getElementById('privacidad-editor').value = privacidadTexto;
+}
+
+function agregarFaq() {
+  const p = document.getElementById('faq-nueva-p').value.trim();
+  const r = document.getElementById('faq-nueva-r').value.trim();
+  if (!p||!r) return toast('Completa pregunta y respuesta');
+  faqs.push({p,r});
+  save(); renderFaqAdmin(); renderFaqPublica();
+  document.getElementById('faq-nueva-p').value='';
+  document.getElementById('faq-nueva-r').value='';
+  toast('Pregunta agregada');
+}
+
+function eliminarFaq(i) {
+  if (!confirm('¿Eliminar esta pregunta?')) return;
+  faqs.splice(i,1); save(); renderFaqAdmin(); renderFaqPublica(); toast('Pregunta eliminada');
+}
+
+function renderFaqAdmin() {
+  const el = document.getElementById('faq-admin-lista');
+  if (!faqs.length) { el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Sin preguntas aún</div>'; return; }
+  el.innerHTML = faqs.map((f,i) => `
+    <div class="faq-edit-row">
+      <div style="font-size:13px;font-weight:500;">${esc(f.p)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${esc(f.r)}</div>
+      <div class="faq-edit-controls">
+        <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger);" onclick="eliminarFaq(${i})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderFaqPublica() {
+  const el = document.getElementById('faq-lista-publica');
+  const empty = document.getElementById('faq-empty');
+  if (!faqs.length) { el.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  el.innerHTML = faqs.map((f,i) => `
+    <div class="faq-item" id="faq-${i}">
+      <div class="faq-question" onclick="toggleFaq(${i})">
+        <span>${esc(f.p)}</span><span class="faq-arrow">▼</span>
+      </div>
+      <div class="faq-answer">${esc(f.r)}</div>
+    </div>`).join('');
+}
+
+function toggleFaq(i) {
+  document.getElementById('faq-'+i).classList.toggle('open');
+}
+
+// ====================================================================
+// PROCESO Y PRIVACIDAD
+// ====================================================================
+function guardarProceso() {
+  procesoTexto = document.getElementById('proceso-editor').value;
+  save(); renderProceso(); toast('Texto guardado');
+}
+function renderProceso() {
+  document.getElementById('proceso-publico').textContent =
+    procesoTexto || 'El administrador publicará esta información próximamente.';
+}
+function guardarPrivacidad() {
+  privacidadTexto = document.getElementById('privacidad-editor').value;
+  save(); renderPrivacidad(); toast('Aviso guardado');
+}
+function renderPrivacidad() {
+  document.getElementById('privacidad-texto').textContent =
+    privacidadTexto || 'El aviso de privacidad será publicado próximamente.';
+}
+
+// ====================================================================
+// BOLETO COMPRADOR
+// ====================================================================
+function normalizar(s) {
+  return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function buscarBoleto() {
+  const num = parseInt(document.getElementById('buscar-num').value);
+  const nombreInput = document.getElementById('buscar-nombre').value;
+  const hint = document.getElementById('hint-box');
+  const el = document.getElementById('boleto-result');
+
+  if (!num || !nombreInput.trim()) {
+    hint.classList.remove('show'); el.innerHTML='';
+    return toast('Completa número y nombre');
+  }
+
+  const b = boletos.find(x=>x.numero===num);
+  if (!b || normalizar(b.nombre) !== normalizar(nombreInput)) {
+    hint.classList.add('show'); el.innerHTML=''; return;
+  }
+
+  hint.classList.remove('show');
+  const fechaSorteo = config.fecha
+    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
+    : 'Por definir';
+
+  // Ticket con textContent para campos de usuario (no innerHTML con datos)
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="ticket-wrap">
+      <div class="ticket-header">
+        <div class="ticket-event"></div>
+        <div class="ticket-title"></div>
+        <div class="ticket-date"></div>
+      </div>
+      <div class="ticket-divider"></div>
+      <div class="ticket-body">
+        <div class="ticket-num-label">Número de boleto</div>
+        <div class="ticket-num" id="t-num"></div>
+        <div class="ticket-holder" id="t-holder"></div>
+        <div class="qr-container" id="qr-box-${b.numero}"></div>
+        <div><span class="ticket-status">
+          <span style="width:6px;height:6px;background:var(--accent2);border-radius:50%;display:inline-block;"></span>
+          <span id="t-estado"></span>
+        </span></div>
+      </div>
+      <div class="ticket-footer">
+        <div><div class="ticket-footer-lbl">Forma de pago</div><div class="ticket-footer-val" id="t-pago"></div></div>
+        <div><div class="ticket-footer-lbl">Precio</div><div class="ticket-footer-val" id="t-precio"></div></div>
+        <div><div class="ticket-footer-lbl">Sorteo</div><div class="ticket-footer-val" id="t-fecha"></div></div>
+      </div>
+    </div>`;
+
+  // Asignar con textContent — nunca con innerHTML para datos de usuario
+  wrap.querySelector('.ticket-event').textContent = config.nombre;
+  wrap.querySelector('.ticket-title').textContent = config.premio;
+  wrap.querySelector('.ticket-date').textContent = 'Sorteo: '+fechaSorteo;
+  wrap.querySelector('#t-num').textContent = String(b.numero).padStart(3,'0');
+  wrap.querySelector('#t-holder').textContent = b.nombre;
+  wrap.querySelector('#t-estado').textContent = b.estado;
+  wrap.querySelector('#t-pago').textContent = b.pago;
+  wrap.querySelector('#t-precio').textContent = '$'+Number(config.precio).toLocaleString('es-MX');
+  wrap.querySelector('#t-fecha').textContent = fechaSorteo;
+
+  const btnShare = document.createElement('button');
+  btnShare.className = 'btn btn-success';
+  btnShare.textContent = 'Compartir por WhatsApp';
+  btnShare.onclick = () => compartirBoleto(b.numero);
+
+  el.innerHTML='';
+  el.appendChild(wrap);
+  el.appendChild(btnShare);
+
+  setTimeout(()=>{
+    const qrEl = document.getElementById('qr-box-'+b.numero);
+    if (qrEl && typeof QRCode !== 'undefined') {
+      new QRCode(qrEl, {
+        text:`Boleto ${b.numero} - ${b.nombre} - ${config.nombre}`,
+        width:80, height:80, colorDark:'#000', colorLight:'#fff',
+        correctLevel:QRCode.CorrectLevel.M
+      });
+    }
+  },100);
+}
+
+function compartirBoleto(num) {
+  const b = boletos.find(x=>x.numero===num); if (!b) return;
+  const fechaS = config.fecha
+    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
+    : 'por confirmar';
+  const msg = `🎟 *${config.nombre}*\n\nBoleto: *${String(b.numero).padStart(3,'0')}*\nNombre: ${b.nombre}\nPremio: ${config.premio}\nSorteo: ${fechaS}\nEstado: ${b.estado}\n\n¡Mucha suerte! 🍀`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+}
+
+// ====================================================================
+// SORTEO — corrige #3: sorteo con un solo número (animación = ganador)
+// ====================================================================
+function updateSorteoInfo() {
+  const pagados = boletos.filter(b=>b.estado==='Pagado').length;
+  document.getElementById('s-participantes').textContent = pagados;
+  document.getElementById('s-premio').textContent = config.premio||'—';
+  document.getElementById('s-fecha').textContent = config.fecha
+    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '—';
+  if (ganador) {
+    document.getElementById('drum-display').textContent = String(ganador.numero).padStart(3,'0');
+    document.getElementById('drum-display').className = 'drum-display winner';
+    document.getElementById('drum-sub').textContent = ganador.nombre;
+    document.getElementById('drum-sub').className = 'drum-sub winner-name';
+    document.getElementById('w-num').textContent = String(ganador.numero).padStart(3,'0');
+    document.getElementById('w-name').textContent = ganador.nombre;
+    document.getElementById('w-tel').textContent = ganador.tel;
+    document.getElementById('winner-card').classList.add('show');
+  }
+}
+
+let countdownInterval;
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  function tick() {
+    if (!config.fecha) {
+      ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='--');
+      return;
+    }
+    const diff = new Date(config.fecha) - new Date();
+    if (diff <= 0) {
+      ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='00');
+      return;
+    }
+    document.getElementById('cd-dias').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('cd-hrs').textContent  = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('cd-min').textContent  = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('cd-seg').textContent  = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  }
+  tick(); countdownInterval = setInterval(tick, 1000);
+}
+
+function realizarSorteo() {
+  const pagados = boletos.filter(b=>b.estado==='Pagado');
+  if (!pagados.length) return toast('No hay boletos con estado Pagado');
+  if (ganador && !confirm('Ya existe un ganador registrado. ¿Realizar nuevo sorteo y reemplazarlo?')) return;
+
+  // Elegir ganador ANTES de la animación — corrige #3
+  const winner = pagados[Math.floor(Math.random()*pagados.length)];
+
+  const drum = document.getElementById('drum-display');
+  const sub  = document.getElementById('drum-sub');
+  drum.className = 'drum-display spinning';
+  sub.textContent = 'Sorteando...'; sub.className = 'drum-sub';
+  document.getElementById('winner-card').classList.remove('show');
+  document.getElementById('btn-sorteo').disabled = true;
+
+  let i = 0;
+  const decoy = [...pagados].filter(b=>b.numero!==winner.numero);
+  const pool  = decoy.length > 0 ? decoy : pagados;
+
+  const iv = setInterval(()=>{
+    // Mostrar números aleatorios distintos al ganador durante la animación
+    if (i < 28) {
+      const r = pool[Math.floor(Math.random()*pool.length)];
+      drum.textContent = String(r.numero).padStart(3,'0');
+    } else if (i === 28) {
+      // Últimas 3 iteraciones: converger al ganador
+      drum.textContent = '...';
+    } else if (i >= 30) {
+      clearInterval(iv);
+      ganador = winner; save();
+      drum.textContent = String(winner.numero).padStart(3,'0');
+      drum.className = 'drum-display winner';
+      sub.textContent = winner.nombre; sub.className = 'drum-sub winner-name';
+      document.getElementById('w-num').textContent = String(winner.numero).padStart(3,'0');
+      document.getElementById('w-name').textContent = winner.nombre;
+      document.getElementById('w-tel').textContent = winner.tel;
+      document.getElementById('winner-card').classList.add('show');
+      document.getElementById('btn-sorteo').disabled = false;
+      toast('Ganador: '+winner.nombre);
+    }
+    i++;
+  }, 80);
+}
+
+function resetSorteo() {
+  if (!confirm('¿Reiniciar el resultado del sorteo?')) return;
+  ganador = null; save();
+  document.getElementById('drum-display').textContent = '???';
+  document.getElementById('drum-display').className = 'drum-display';
+  document.getElementById('drum-sub').textContent = 'Pendiente de realizar';
+  document.getElementById('drum-sub').className = 'drum-sub';
+  document.getElementById('winner-card').classList.remove('show');
+}
+
+// ====================================================================
+// TOAST
+// ====================================================================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ====================================================================
+// INIT
+// ====================================================================
+updateHero(); renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad();
+startCountdown();
+</script>
+</body>
+</html>
