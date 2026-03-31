@@ -384,14 +384,23 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
       <div id="panel-galeria-admin" class="inner-panel">
         <div class="card">
           <div class="card-title">Imágenes del vehículo</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Las fotos se guardan en este dispositivo. Súbelas desde el dispositivo principal.</div>
-          <div class="upload-area" onclick="document.getElementById('file-input').click()">
-            <div class="upload-icon">📷</div>
-            <div class="upload-label">Toca para subir fotos</div>
-            <div class="upload-sub">JPG, PNG · Máx. 2 MB por imagen</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
+            Las fotos se guardan en la nube y todos las ven. Pega el enlace directo de cada foto
+            (Google Fotos, Imgur, WhatsApp Web, etc).
           </div>
-          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple onchange="subirImagenes(event)">
-          <div id="galeria-admin-grid" class="galeria-grid"></div>
+          <div style="background:rgba(124,106,245,0.08);border:1px solid rgba(124,106,245,0.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+            <strong style="color:var(--text);">¿Cómo obtener el enlace?</strong><br>
+            Google Fotos: abre la foto → compartir → copiar enlace.<br>
+            Imgur: sube la foto en imgur.com → clic derecho → copiar dirección de imagen.<br>
+            WhatsApp Web: abre la foto → clic derecho → copiar dirección de imagen.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Enlace de la foto (URL)</label>
+            <input class="form-input" id="foto-url" placeholder="https://i.imgur.com/ejemplo.jpg"
+              onkeydown="if(event.key==='Enter') agregarFoto()">
+          </div>
+          <button class="btn btn-primary" onclick="agregarFoto()">Agregar foto</button>
+          <div id="galeria-admin-grid" class="galeria-grid" style="margin-top:16px;"></div>
         </div>
       </div>
 
@@ -497,7 +506,7 @@ let ganador = null;
 let faqs = [];
 let procesoTexto = '';
 let privacidadTexto = `AVISO DE PRIVACIDAD\n\nEl responsable de la presente rifa recaba los siguientes datos personales: nombre completo y teléfono.\n\nFinalidad: administración de boletos e identificación del ganador. Los datos no serán compartidos con terceros.`;
-let imagenes = JSON.parse(localStorage.getItem('rifa_imagenes') || '[]'); // fotos siguen locales
+let imagenes = []; // URLs cargadas desde Supabase
 
 let adminLoggedIn = false;
 let loginAttempts = 0;
@@ -563,6 +572,10 @@ async function recargarTodo() {
       procesoTexto = contData[0].proceso || '';
       privacidadTexto = contData[0].privacidad || privacidadTexto;
     }
+
+    // Fotos
+    const fotosData = await sb.get('fotos', '?order=orden.asc');
+    imagenes = (fotosData || []).map(f => ({ id: f.id, url: f.url }));
 
     setSyncStatus(true, 'Sincronizado');
     updateHero(); updateStats(); renderLista();
@@ -858,41 +871,50 @@ async function borrarTodo() {
 // =====================================================================
 // GALERÍA (local por dispositivo)
 // =====================================================================
-function subirImagenes(e) {
-  const files=Array.from(e.target.files);
-  files.forEach(file=>{
-    if (file.size>2*1024*1024) { toast('Imagen muy grande: '+file.name); return; }
-    const r=new FileReader();
-    r.onload=ev=>{
-      imagenes.push(ev.target.result);
-      try { localStorage.setItem('rifa_imagenes',JSON.stringify(imagenes)); } catch(err) { toast('Sin espacio para más fotos'); imagenes.pop(); return; }
-      renderGaleriaAdmin(); renderGaleria(); toast('Foto agregada');
-    };
-    r.readAsDataURL(file);
-  });
-  e.target.value='';
+// GALERÍA — URLs guardadas en Supabase, visibles para todos
+// =====================================================================
+async function agregarFoto() {
+  const url = document.getElementById('foto-url').value.trim();
+  if (!url) return toast('Pega el enlace de la foto');
+  if (!url.startsWith('http')) return toast('El enlace debe empezar con http');
+  loading(true, 'Guardando foto...');
+  try {
+    const res = await sb.post('fotos', { url, orden: imagenes.length });
+    const nueva = res && res.length ? res[0] : { id: Date.now(), url };
+    imagenes.push({ id: nueva.id, url });
+    document.getElementById('foto-url').value = '';
+    renderGaleriaAdmin(); renderGaleria();
+    toast('Foto agregada'); setSyncStatus(true, 'Sincronizado');
+  } catch(e) { toast('Error: ' + e.message); setSyncStatus(false, 'Error'); }
+  loading(false);
 }
 function renderGaleria() {
-  const el=document.getElementById('galeria-publica');
-  const counter=document.getElementById('galeria-counter');
+  const el = document.getElementById('galeria-publica');
+  const counter = document.getElementById('galeria-counter');
   if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>'; counter.textContent=''; return; }
-  el.innerHTML=imagenes.map(src=>`<img class="galeria-img" src="${src}" alt="Vehículo" onclick="openLightbox(this.src)">`).join('');
-  counter.textContent=imagenes.length+' foto(s) · Toca para ampliar';
+  el.innerHTML = imagenes.map(f => `<img class="galeria-img" src="${esc(f.url)}" alt="Vehículo" onclick="openLightbox('${esc(f.url)}')">`).join('');
+  counter.textContent = imagenes.length + ' foto(s) · Toca para ampliar';
 }
 function renderGaleriaAdmin() {
-  const el=document.getElementById('galeria-admin-grid');
+  const el = document.getElementById('galeria-admin-grid');
   if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>'; return; }
-  el.innerHTML=imagenes.map((src,i)=>`
+  el.innerHTML = imagenes.map((f, i) => `
     <div style="position:relative;">
-      <img class="galeria-img" src="${src}" alt="Foto ${i+1}" onclick="openLightbox(this.src)">
-      <button onclick="eliminarImagen(${i})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+      <img class="galeria-img" src="${esc(f.url)}" alt="Foto ${i+1}" onclick="openLightbox('${esc(f.url)}')"
+        onerror="this.style.opacity='0.3';this.title='Enlace inválido'">
+      <button onclick="eliminarFoto(${f.id})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
     </div>`).join('');
 }
-function eliminarImagen(i) {
-  if (!confirm('¿Eliminar foto?')) return;
-  imagenes.splice(i,1);
-  localStorage.setItem('rifa_imagenes',JSON.stringify(imagenes));
-  renderGaleriaAdmin(); renderGaleria(); toast('Foto eliminada');
+async function eliminarFoto(id) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  loading(true, 'Eliminando...');
+  try {
+    await sb.delete('fotos', `?id=eq.${id}`);
+    imagenes = imagenes.filter(f => f.id !== id);
+    renderGaleriaAdmin(); renderGaleria(); toast('Foto eliminada');
+    setSyncStatus(true, 'Sincronizado');
+  } catch(e) { toast('Error: ' + e.message); }
+  loading(false);
 }
 function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
