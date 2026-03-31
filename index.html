@@ -7,20 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root {
-  --bg:#0a0a0f; --surface:#13131a; --surface2:#1c1c28;
-  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
-  --text:#f0eeff; --muted:#7b7a9a;
-  --accent:#7c6af5; --accent2:#5ee8b0; --accent3:#f5a44a; --danger:#f55a5a;
-  --font-head:'Syne',sans-serif; --font-body:'DM Sans',sans-serif;
-  --radius:14px; --radius-sm:8px;
-}
+:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c28;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0eeff;--muted:#7b7a9a;--accent:#7c6af5;--accent2:#5ee8b0;--accent3:#f5a44a;--danger:#f55a5a;--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--radius:14px;--radius-sm:8px;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 .app{display:flex;flex-direction:column;min-height:100vh;}
 .view{display:none;flex:1;flex-direction:column;}
 .view.active{display:flex;}
+
+/* LOADING GLOBAL */
+.loading-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(10,10,15,0.85);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.loading-overlay.open{display:flex;}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--muted);}
 
 /* LOGIN */
 .login-screen{display:none;position:fixed;inset:0;z-index:500;background:var(--bg);align-items:center;justify-content:center;padding:24px;}
@@ -35,7 +35,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 
 /* NAV */
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 10px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
-.nav-logo{font-family:var(--font-head);font-size:15px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.nav-logo{font-family:var(--font-head);font-size:14px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;}
 .nav-right{display:flex;align-items:center;gap:4px;}
 .nav-tabs{display:flex;gap:2px;flex-wrap:wrap;}
 .nav-tab{font-family:var(--font-body);font-size:11px;font-weight:500;padding:5px 9px;border-radius:20px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
@@ -46,7 +46,6 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 10
 .btn-logout:hover{color:var(--danger);border-color:var(--danger);}
 
 .scroll-area{flex:1;overflow-y:auto;padding:20px 16px 32px;}
-
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
 .card-title{font-family:var(--font-head);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
 
@@ -119,7 +118,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .search-input:focus{border-color:var(--accent);}
 .search-input::placeholder{color:var(--muted);}
 
-/* SORTEO */
 .countdown-big{text-align:center;padding:24px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;}
 .countdown-title{font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
 .countdown-units{display:flex;gap:8px;justify-content:center;align-items:center;}
@@ -146,7 +144,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .winner-boleto{font-family:var(--font-head);font-size:48px;font-weight:800;color:var(--accent2);line-height:1;}
 .winner-person{font-size:16px;font-weight:500;margin-top:4px;}
 .winner-tel{font-size:12px;color:var(--muted);}
-/* Sorteo: botón admin-only */
 .sorteo-admin-only{display:none;}
 .sorteo-admin-only.visible{display:block;}
 
@@ -165,7 +162,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .hint-box{background:rgba(245,164,74,0.08);border:1px solid rgba(245,164,74,0.25);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--accent3);margin-bottom:12px;display:none;}
 .hint-box.show{display:block;}
 
-/* GALERÍA */
 .galeria-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
 .galeria-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:opacity 0.2s;}
 .galeria-img:hover{opacity:0.85;}
@@ -175,19 +171,13 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .upload-icon{font-size:28px;margin-bottom:8px;}
 .upload-label{font-size:13px;color:var(--muted);}
 .upload-sub{font-size:11px;color:var(--muted);margin-top:4px;}
-/* Advertencia de almacenamiento */
-.storage-bar{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted);}
-.storage-fill-wrap{height:4px;background:var(--border2);border-radius:2px;margin-top:6px;overflow:hidden;}
-.storage-fill{height:100%;border-radius:2px;transition:width 0.3s;}
 #file-input{display:none;}
 
-/* Lightbox */
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;align-items:center;justify-content:center;padding:20px;}
 .lightbox.open{display:flex;}
 .lightbox img{max-width:100%;max-height:90vh;border-radius:var(--radius-sm);object-fit:contain;}
 .lightbox-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* FAQ */
 .faq-item{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden;}
 .faq-question{padding:14px 16px;font-size:13px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background 0.2s;}
 .faq-question:hover{background:var(--surface2);}
@@ -198,20 +188,29 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .faq-edit-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;}
 .faq-edit-controls{display:flex;gap:6px;margin-top:8px;}
 
-/* TRANSPARENCIA / PRIVACIDAD */
-.proceso-content{font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
-.privacidad-text{font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.proceso-content,.privacidad-text{font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
 
-/* PAGE TABS */
 .page-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
 .page-tab{flex:1;min-width:80px;padding:9px 6px;font-size:11px;font-weight:500;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-align:center;}
 .page-tab.active{background:var(--surface2);color:var(--text);border-color:var(--border2);}
 .page-tab:hover:not(.active){color:var(--text);}
 .page-section{display:none;}
 .page-section.active{display:block;}
+
+/* Indicador de sincronización */
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--muted);}
+.sync-dot.ok{background:var(--accent2);}
+.sync-dot.err{background:var(--danger);}
+.sync-label{font-size:10px;color:var(--muted);display:flex;align-items:center;}
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loading-msg">Conectando...</div>
+</div>
 
 <!-- LOGIN -->
 <div class="login-screen" id="login-screen">
@@ -219,7 +218,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
     <div class="login-logo">RIFA 2025</div>
     <div class="login-sub">Acceso exclusivo para administrador</div>
     <div class="login-error" id="login-error"></div>
-    <div class="login-blocked" id="login-blocked">Acceso bloqueado por múltiples intentos fallidos.<br>Recarga la página para reintentar.</div>
+    <div class="login-blocked" id="login-blocked">Acceso bloqueado por múltiples intentos.<br>Recarga la página para reintentar.</div>
     <div class="form-group">
       <label class="form-label">Contraseña</label>
       <input class="form-input" id="login-pass" type="password" placeholder="••••••••"
@@ -244,7 +243,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
     </div>
   </nav>
 
-  <!-- ====== VISTA INFO ====== -->
+  <!-- INFO -->
   <div id="view-info" class="view active">
     <div class="scroll-area">
       <div class="card" style="background:linear-gradient(135deg,rgba(124,106,245,0.15),rgba(94,232,176,0.08));border-color:rgba(124,106,245,0.3);text-align:center;padding:24px 16px;">
@@ -252,45 +251,34 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         <div id="hero-premio" style="font-family:var(--font-head);font-size:26px;font-weight:800;margin-bottom:4px;"></div>
         <div style="font-size:13px;color:var(--muted);">Sorteo: <span id="hero-fecha">Por definir</span></div>
         <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <span style="background:rgba(124,106,245,0.15);color:var(--accent);border:1px solid rgba(124,106,245,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;">$<span id="hero-precio">300</span> por boleto</span>
-          <span style="background:rgba(94,232,176,0.15);color:var(--accent2);border:1px solid rgba(94,232,176,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;"><span id="hero-total">500</span> boletos</span>
+          <span style="background:rgba(124,106,245,0.15);color:var(--accent);border:1px solid rgba(124,106,245,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;">$<span id="hero-precio">—</span> por boleto</span>
+          <span style="background:rgba(94,232,176,0.15);color:var(--accent2);border:1px solid rgba(94,232,176,0.3);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;"><span id="hero-total">—</span> boletos</span>
         </div>
       </div>
-
       <div class="page-tabs">
         <button class="page-tab active" onclick="pageTab('galeria')">Fotos</button>
         <button class="page-tab" onclick="pageTab('proceso')">Transparencia</button>
         <button class="page-tab" onclick="pageTab('faq')">Preguntas</button>
         <button class="page-tab" onclick="pageTab('privacidad')">Privacidad</button>
       </div>
-
       <div id="sec-galeria" class="page-section active">
         <div id="galeria-publica" class="galeria-grid"></div>
         <div style="text-align:center;margin-top:4px;font-size:11px;color:var(--muted);" id="galeria-counter"></div>
       </div>
-
       <div id="sec-proceso" class="page-section">
-        <div class="card">
-          <div class="card-title">Proceso del sorteo</div>
-          <div class="proceso-content" id="proceso-publico"></div>
-        </div>
+        <div class="card"><div class="card-title">Proceso del sorteo</div><div class="proceso-content" id="proceso-publico"></div></div>
       </div>
-
       <div id="sec-faq" class="page-section">
         <div id="faq-lista-publica"></div>
         <div class="empty" id="faq-empty" style="display:none;"><div class="empty-icon">💬</div>Sin preguntas agregadas aún</div>
       </div>
-
       <div id="sec-privacidad" class="page-section">
-        <div class="card">
-          <div class="card-title">Aviso de privacidad</div>
-          <div class="privacidad-text" id="privacidad-texto"></div>
-        </div>
+        <div class="card"><div class="card-title">Aviso de privacidad</div><div class="privacidad-text" id="privacidad-texto"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- ====== VISTA BOLETO ====== -->
+  <!-- BOLETO -->
   <div id="view-boleto" class="view">
     <div class="scroll-area">
       <div style="background:rgba(124,106,245,0.08);border:1px solid rgba(124,106,245,0.25);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:12px;">
@@ -299,15 +287,9 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         <div style="font-size:12px;color:var(--muted);">Ingresa tu número y nombre exactamente como fueron registrados</div>
       </div>
       <div class="card">
-        <div class="form-group">
-          <label class="form-label">Número de boleto</label>
-          <input class="form-input" id="buscar-num" type="number" min="1" placeholder="Ej: 47">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tu nombre completo</label>
-          <input class="form-input" id="buscar-nombre" placeholder="Ej: Juan García López"
-            onkeydown="if(event.key==='Enter') buscarBoleto()">
-        </div>
+        <div class="form-group"><label class="form-label">Número de boleto</label><input class="form-input" id="buscar-num" type="number" min="1" placeholder="Ej: 47"></div>
+        <div class="form-group"><label class="form-label">Tu nombre completo</label>
+          <input class="form-input" id="buscar-nombre" placeholder="Ej: Juan García López" onkeydown="if(event.key==='Enter') buscarBoleto()"></div>
         <div class="hint-box" id="hint-box">Nombre o número incorrecto. Verifica con quien te vendió el boleto.</div>
         <button class="btn btn-primary" onclick="buscarBoleto()">Ver mi boleto</button>
       </div>
@@ -315,7 +297,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
     </div>
   </div>
 
-  <!-- ====== VISTA SORTEO ====== -->
+  <!-- SORTEO -->
   <div id="view-sorteo" class="view">
     <div class="scroll-area">
       <div class="countdown-big">
@@ -347,7 +329,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         <div class="drum-display" id="drum-display">???</div>
         <div class="drum-sub" id="drum-sub">Pendiente de realizar</div>
       </div>
-      <!-- Solo visible para admin: #6 corregido -->
       <div class="sorteo-admin-only" id="sorteo-btns">
         <button class="btn btn-primary" id="btn-sorteo" onclick="realizarSorteo()">Realizar sorteo ahora</button>
         <button class="btn btn-secondary" style="margin-top:8px;" onclick="resetSorteo()">Reiniciar sorteo</button>
@@ -356,12 +337,16 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
     </div>
   </div>
 
-  <!-- ====== VISTA ADMIN ====== -->
+  <!-- ADMIN -->
   <div id="view-admin" class="view">
     <div class="scroll-area">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="sync-label"><span class="sync-dot" id="sync-dot"></span><span id="sync-label">Sincronizando...</span></span>
+        <button onclick="recargarTodo()" style="font-size:11px;background:transparent;border:none;color:var(--muted);cursor:pointer;">↻ Actualizar</button>
+      </div>
       <div class="stat-grid">
         <div class="stat-box"><div class="stat-num" id="stat-vendidos">0</div><div class="stat-lbl">Vendidos</div></div>
-        <div class="stat-box"><div class="stat-num green" id="stat-libres">500</div><div class="stat-lbl">Libres</div></div>
+        <div class="stat-box"><div class="stat-num green" id="stat-libres">—</div><div class="stat-lbl">Libres</div></div>
         <div class="stat-box"><div class="stat-num amber" id="stat-recaudado">$0</div><div class="stat-lbl">Recaudado</div></div>
       </div>
       <div class="progress-wrap card" style="padding:14px;">
@@ -376,19 +361,17 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         <button class="inner-tab" onclick="innerTab('config')">Config</button>
       </div>
 
-      <!-- Lista -->
       <div id="panel-lista" class="inner-panel active">
         <input class="search-input" id="search-input" placeholder="Buscar por nombre, número o vendedor..." oninput="renderLista()">
         <div id="lista-boletos"></div>
       </div>
 
-      <!-- Nuevo -->
       <div id="panel-nuevo" class="inner-panel">
         <div class="card">
           <div class="card-title">Datos del comprador</div>
           <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" id="f-nombre" placeholder="Ej: Juan García López"></div>
           <div class="form-group"><label class="form-label">Teléfono (WhatsApp)</label><input class="form-input" id="f-tel" type="tel" placeholder="3310000000" maxlength="15"></div>
-          <div class="form-group"><label class="form-label">Número de boleto (1–<span id="max-label">500</span>)</label><input class="form-input" id="f-num" type="number" min="1" max="500" placeholder="Ej: 47"></div>
+          <div class="form-group"><label class="form-label">Número de boleto (1–<span id="max-label">500</span>)</label><input class="form-input" id="f-num" type="number" min="1" placeholder="Ej: 47"></div>
           <div class="form-group"><label class="form-label">Vendedor</label><input class="form-input" id="f-vendedor" placeholder="Ej: María López"></div>
           <div class="form-group"><label class="form-label">Forma de pago</label>
             <select class="form-input" id="f-pago"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option></select></div>
@@ -398,53 +381,40 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         </div>
       </div>
 
-      <!-- Galería admin -->
       <div id="panel-galeria-admin" class="inner-panel">
         <div class="card">
           <div class="card-title">Imágenes del vehículo</div>
-          <div class="storage-bar" id="storage-bar">
-            <span id="storage-label">Almacenamiento: calculando...</span>
-            <div class="storage-fill-wrap"><div class="storage-fill" id="storage-fill"></div></div>
-          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Las fotos se guardan en este dispositivo. Súbelas desde el dispositivo principal.</div>
           <div class="upload-area" onclick="document.getElementById('file-input').click()">
             <div class="upload-icon">📷</div>
             <div class="upload-label">Toca para subir fotos</div>
-            <div class="upload-sub">JPG, PNG · Máx. 2 MB por imagen · Recomendado: foto desde el celular</div>
+            <div class="upload-sub">JPG, PNG · Máx. 2 MB por imagen</div>
           </div>
           <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple onchange="subirImagenes(event)">
           <div id="galeria-admin-grid" class="galeria-grid"></div>
         </div>
       </div>
 
-      <!-- Contenido editable -->
       <div id="panel-contenido" class="inner-panel">
         <div class="card">
           <div class="card-title">Preguntas frecuentes</div>
           <div id="faq-admin-lista"></div>
-          <div class="form-group" style="margin-top:12px;">
-            <label class="form-label">Nueva pregunta</label>
-            <input class="form-input" id="faq-nueva-p" placeholder="Ej: ¿Cuándo se realiza el sorteo?">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Respuesta</label>
-            <textarea class="form-input" id="faq-nueva-r" placeholder="Escribe la respuesta aquí..."></textarea>
-          </div>
+          <div class="form-group" style="margin-top:12px;"><label class="form-label">Nueva pregunta</label><input class="form-input" id="faq-nueva-p" placeholder="Ej: ¿Cuándo es el sorteo?"></div>
+          <div class="form-group"><label class="form-label">Respuesta</label><textarea class="form-input" id="faq-nueva-r" placeholder="Escribe la respuesta..."></textarea></div>
           <button class="btn btn-primary" onclick="agregarFaq()">Agregar pregunta</button>
         </div>
         <div class="card">
           <div class="card-title">Texto de transparencia</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Explica cómo funciona la rifa, quién organiza, cómo se realiza el sorteo. Visible para todos.</div>
-          <div class="form-group"><textarea class="form-input" id="proceso-editor" style="min-height:160px;" placeholder="Ej: Esta rifa es organizada por... El sorteo se realizará el..."></textarea></div>
-          <button class="btn btn-primary" onclick="guardarProceso()">Guardar texto de transparencia</button>
+          <div class="form-group"><textarea class="form-input" id="proceso-editor" style="min-height:160px;" placeholder="Explica cómo funciona la rifa, quién organiza, cómo se realiza el sorteo..."></textarea></div>
+          <button class="btn btn-primary" onclick="guardarProceso()">Guardar</button>
         </div>
         <div class="card">
           <div class="card-title">Aviso de privacidad</div>
           <div class="form-group"><textarea class="form-input" id="privacidad-editor" style="min-height:160px;"></textarea></div>
-          <button class="btn btn-primary" onclick="guardarPrivacidad()">Guardar aviso de privacidad</button>
+          <button class="btn btn-primary" onclick="guardarPrivacidad()">Guardar</button>
         </div>
       </div>
 
-      <!-- Config -->
       <div id="panel-config" class="inner-panel">
         <div class="card">
           <div class="card-title">Configuración de la rifa</div>
@@ -465,11 +435,11 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
   </div>
 </div>
 
-<!-- Modal detalle boleto -->
+<!-- Modal -->
 <div class="modal-overlay" id="modal-detalle" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-title-text">Detalle del boleto</div>
+    <div class="modal-title">Detalle del boleto</div>
     <div id="modal-content"></div>
     <button class="btn btn-secondary" onclick="closeModalDirect()" style="margin-top:12px;">Cerrar</button>
   </div>
@@ -484,98 +454,137 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 <div class="toast" id="toast"></div>
 
 <script>
-// ====================================================================
-// UTILIDADES DE SEGURIDAD
-// ====================================================================
+// =====================================================================
+// CONFIGURACIÓN SUPABASE
+// =====================================================================
+const SUPABASE_URL = 'https://siwhfsiyvogkkbtzazmj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_brrVMMPMXSFih-rOojgcFg_ughPVW66';
 
-// Sanitizar texto para insertar en HTML sin riesgo XSS
-// Corrige problemas #1 y #2 del análisis
-function esc(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
+// Cliente Supabase REST API
+const sb = {
+  async query(table, method='GET', body=null, params='') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}${params}`;
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method==='POST' ? 'return=representation' : (method==='PATCH'||method==='PUT' ? 'return=representation' : '')
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  },
+  get: (table, params='') => sb.query(table,'GET',null,params),
+  post: (table, body) => sb.query(table,'POST',body),
+  patch: (table, body, params) => sb.query(table,'PATCH',body,params),
+  delete: (table, params) => sb.query(table,'DELETE',null,params),
+};
 
-// Hash simple para la contraseña (no reversible desde la UI)
-// Corrige problema #4: contraseña en texto plano
-async function hashPass(pass) {
-  const enc = new TextEncoder().encode(pass + 'rifa_salt_2025');
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-// Validar teléfono: solo dígitos, +, espacios y guiones, entre 8 y 15 chars
-// Corrige problema #6
-function validarTel(tel) {
-  return /^[+\d\s\-]{8,15}$/.test(tel);
-}
-
-// ====================================================================
-// ESTADO
-// ====================================================================
-const DEFAULT_PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // 'password' — se reemplaza en primer uso
-let boletos = JSON.parse(localStorage.getItem('rifa_boletos') || '[]');
-let config = JSON.parse(localStorage.getItem('rifa_config') || JSON.stringify({
-  nombre:'Rifa Vehículo 2025', premio:'Vehículo 2024',
-  precio:300, total:500, fecha:'',
-  passHash: null  // null = aún no configurada, usará DEFAULT
-}));
-let ganador = JSON.parse(localStorage.getItem('rifa_ganador') || 'null');
-let imagenes = JSON.parse(localStorage.getItem('rifa_imagenes') || '[]');
-let faqs = JSON.parse(localStorage.getItem('rifa_faqs') || '[]');
-let procesoTexto = localStorage.getItem('rifa_proceso') || '';
-let privacidadTexto = localStorage.getItem('rifa_privacidad') ||
-`AVISO DE PRIVACIDAD
-
-El responsable de la presente rifa recaba los siguientes datos personales de los participantes: nombre completo y número de teléfono.
-
-Finalidad: Dichos datos se utilizan exclusivamente para la administración de los boletos, identificación de participantes y notificación al ganador del sorteo.
-
-Los datos no serán compartidos con terceros ni utilizados para ningún otro fin sin consentimiento del titular.
-
-El participante puede solicitar la corrección o eliminación de sus datos contactando directamente al organizador.`;
+// =====================================================================
+// ESTADO EN MEMORIA
+// =====================================================================
+let boletos = [];
+let config = { nombre:'Rifa 2025', premio:'Vehículo', precio:300, total:500, fecha:'', pass_hash:'' };
+let ganador = null;
+let faqs = [];
+let procesoTexto = '';
+let privacidadTexto = `AVISO DE PRIVACIDAD\n\nEl responsable de la presente rifa recaba los siguientes datos personales: nombre completo y teléfono.\n\nFinalidad: administración de boletos e identificación del ganador. Los datos no serán compartidos con terceros.`;
+let imagenes = JSON.parse(localStorage.getItem('rifa_imagenes') || '[]'); // fotos siguen locales
 
 let adminLoggedIn = false;
 let loginAttempts = 0;
 const MAX_ATTEMPTS = 5;
 
-function save() {
-  try {
-    localStorage.setItem('rifa_boletos', JSON.stringify(boletos));
-    localStorage.setItem('rifa_config', JSON.stringify(config));
-    localStorage.setItem('rifa_ganador', JSON.stringify(ganador));
-    localStorage.setItem('rifa_faqs', JSON.stringify(faqs));
-    localStorage.setItem('rifa_proceso', procesoTexto);
-    localStorage.setItem('rifa_privacidad', privacidadTexto);
-  } catch(e) {
-    toast('⚠️ Error al guardar: almacenamiento lleno');
-  }
+// =====================================================================
+// UTILIDADES
+// =====================================================================
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function saveImages() {
-  try {
-    localStorage.setItem('rifa_imagenes', JSON.stringify(imagenes));
-  } catch(e) {
-    toast('⚠️ Sin espacio para más fotos. Elimina algunas.');
-    return false;
-  }
-  return true;
+async function hashPass(p) {
+  const enc = new TextEncoder().encode(p+'rifa_salt_2025');
+  const buf = await crypto.subtle.digest('SHA-256',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function validarTel(t) { return /^[+\d\s\-]{8,15}$/.test(t); }
+function normalizar(s) { return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+function loading(show, msg='Guardando...') {
+  document.getElementById('loading-overlay').classList.toggle('open', show);
+  document.getElementById('loading-msg').textContent = msg;
+}
+function setSyncStatus(ok, msg) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot) return;
+  dot.className = 'sync-dot ' + (ok ? 'ok' : 'err');
+  lbl.textContent = msg;
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
 }
 
-// ====================================================================
-// LOGIN — corrige #4 (hash) y mejora bloqueo
-// ====================================================================
+// =====================================================================
+// CARGA INICIAL DESDE SUPABASE
+// =====================================================================
+async function recargarTodo() {
+  loading(true, 'Cargando datos...');
+  try {
+    // Config
+    const cfgData = await sb.get('config', '?id=eq.1');
+    if (cfgData && cfgData.length) config = cfgData[0];
+
+    // Boletos
+    const boletosData = await sb.get('boletos', '?order=numero.asc');
+    boletos = boletosData || [];
+
+    // Ganador
+    const ganadorData = await sb.get('ganador', '?id=eq.1');
+    if (ganadorData && ganadorData.length && ganadorData[0].numero) ganador = ganadorData[0];
+    else ganador = null;
+
+    // FAQs
+    const faqData = await sb.get('faqs', '?order=orden.asc');
+    faqs = faqData || [];
+
+    // Contenido
+    const contData = await sb.get('contenido', '?id=eq.1');
+    if (contData && contData.length) {
+      procesoTexto = contData[0].proceso || '';
+      privacidadTexto = contData[0].privacidad || privacidadTexto;
+    }
+
+    setSyncStatus(true, 'Sincronizado');
+    updateHero(); updateStats(); renderLista();
+    renderFaqPublica(); renderProceso(); renderPrivacidad();
+    renderGaleria(); updateSorteoInfo();
+    startCountdown();
+  } catch(e) {
+    setSyncStatus(false, 'Error de conexión');
+    toast('Error al conectar con la base de datos');
+    console.error(e);
+  }
+  loading(false);
+}
+
+// =====================================================================
+// LOGIN
+// =====================================================================
 function checkAdminTab() { if (!adminLoggedIn) openLogin(); }
-
 function cancelarLogin() {
   document.getElementById('login-screen').classList.remove('open');
-  // Devolver al tab activo anterior o Info
   goView('info');
 }
-
 function openLogin() {
   document.getElementById('login-screen').classList.add('open');
   document.getElementById('login-pass').value = '';
@@ -587,148 +596,121 @@ function openLogin() {
     document.getElementById('login-pass').disabled = true;
   }
 }
-
 async function doLogin() {
   if (loginAttempts >= MAX_ATTEMPTS) return;
   const pass = document.getElementById('login-pass').value;
   if (!pass) return;
-
   const hash = await hashPass(pass);
-  // Primera vez: contraseña por defecto es 'admin1234'
   const defaultHash = await hashPass('admin1234');
-  const storedHash = config.passHash || defaultHash;
-
+  const storedHash = config.pass_hash || defaultHash;
   if (hash === storedHash) {
     adminLoggedIn = true; loginAttempts = 0;
     document.getElementById('login-screen').classList.remove('open');
     document.getElementById('btn-logout').classList.add('visible');
-    updateStats(); renderLista();
-    // Navegar a admin
     _activateView('admin');
+    updateStats(); renderLista();
   } else {
     loginAttempts++;
     const r = MAX_ATTEMPTS - loginAttempts;
     const errEl = document.getElementById('login-error');
-    if (r > 0) {
-      errEl.textContent = `Contraseña incorrecta. ${r} intento(s) restantes.`;
-    } else {
-      errEl.textContent = 'Acceso bloqueado.';
+    errEl.textContent = r > 0 ? `Contraseña incorrecta. ${r} intento(s) restantes.` : 'Acceso bloqueado.';
+    errEl.classList.add('show');
+    if (r <= 0) {
       document.getElementById('login-blocked').classList.add('show');
       document.getElementById('btn-login').disabled = true;
       document.getElementById('login-pass').disabled = true;
     }
-    errEl.classList.add('show');
     document.getElementById('login-pass').value = '';
   }
 }
-
-// Corrige #8: confirmar antes de cerrar sesión
 function logout() {
   if (!confirm('¿Cerrar sesión de administrador?')) return;
   adminLoggedIn = false;
   document.getElementById('btn-logout').classList.remove('visible');
-  // Ocultar botones de sorteo
   document.getElementById('sorteo-btns').classList.remove('visible');
   goView('info');
   toast('Sesión cerrada');
 }
 
-// ====================================================================
+// =====================================================================
 // NAVEGACIÓN
-// ====================================================================
+// =====================================================================
 function goView(v) {
-  if (v === 'admin' && !adminLoggedIn) { checkAdminTab(); return; }
+  if (v==='admin' && !adminLoggedIn) { checkAdminTab(); return; }
   _activateView(v);
 }
-
 function _activateView(v) {
-  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
-  document.getElementById('view-' + v).classList.add('active');
-  const idx = {info:0, boleto:1, sorteo:2, admin:3};
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  const idx={info:0,boleto:1,sorteo:2,admin:3};
   document.querySelectorAll('.nav-tab')[idx[v]].classList.add('active');
-  if (v === 'admin') { updateStats(); renderLista(); }
-  if (v === 'sorteo') {
+  if (v==='admin') { updateStats(); renderLista(); }
+  if (v==='sorteo') {
     updateSorteoInfo();
-    // Corrige #7: botones de sorteo solo visibles para admin
-    const btns = document.getElementById('sorteo-btns');
-    const msg = document.getElementById('sorteo-msg-publico');
-    if (adminLoggedIn) {
-      btns.classList.add('visible');
-      msg.textContent = '';
-    } else {
-      btns.classList.remove('visible');
-      msg.textContent = 'El sorteo es realizado por el administrador en la fecha programada.';
-    }
+    const btns=document.getElementById('sorteo-btns');
+    const msg=document.getElementById('sorteo-msg-publico');
+    if (adminLoggedIn) { btns.classList.add('visible'); msg.textContent=''; }
+    else { btns.classList.remove('visible'); msg.textContent='El sorteo es realizado por el administrador en la fecha programada.'; }
   }
-  if (v === 'info') { renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad(); updateHero(); }
+  if (v==='info') { renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad(); updateHero(); }
 }
-
 function pageTab(name) {
-  document.querySelectorAll('.page-tab').forEach((t,i) => {
+  document.querySelectorAll('.page-tab').forEach((t,i)=>{
     const ns=['galeria','proceso','faq','privacidad'];
-    t.classList.toggle('active', ns[i]===name);
+    t.classList.toggle('active',ns[i]===name);
   });
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
 }
-
 function innerTab(name) {
   const names=['lista','nuevo','galeria-admin','contenido','config'];
-  document.querySelectorAll('.inner-tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
-  document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if (name==='config') loadConfig();
-  if (name==='galeria-admin') { renderGaleriaAdmin(); updateStorageBar(); }
+  if (name==='galeria-admin') renderGaleriaAdmin();
   if (name==='contenido') loadContenido();
 }
 
-// ====================================================================
-// HERO
-// ====================================================================
+// =====================================================================
+// HERO & STATS
+// =====================================================================
 function updateHero() {
-  document.getElementById('hero-evento').textContent = config.nombre;
-  document.getElementById('hero-premio').textContent = config.premio;
-  document.getElementById('hero-precio').textContent = Number(config.precio).toLocaleString('es-MX');
-  document.getElementById('hero-total').textContent = config.total;
+  document.getElementById('hero-evento').textContent = config.nombre||'';
+  document.getElementById('hero-premio').textContent = config.premio||'';
+  document.getElementById('hero-precio').textContent = Number(config.precio||0).toLocaleString('es-MX');
+  document.getElementById('hero-total').textContent = config.total||'';
   document.getElementById('hero-fecha').textContent = config.fecha
     ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
     : 'Por definir';
-  // Actualizar título en nav también
-  document.getElementById('nav-title').textContent = config.nombre || 'RIFA 2025';
+  document.getElementById('nav-title').textContent = config.nombre||'RIFA 2025';
 }
-
-// ====================================================================
-// STATS
-// ====================================================================
 function updateStats() {
-  const libres = Math.max(0, config.total - boletos.length);
-  const recaudado = boletos.filter(b=>b.estado==='Pagado').length * config.precio;
+  const libres = Math.max(0,(config.total||500)-boletos.length);
+  const recaudado = boletos.filter(b=>b.estado==='Pagado').length*(config.precio||0);
   document.getElementById('stat-vendidos').textContent = boletos.length;
   document.getElementById('stat-libres').textContent = libres;
-  document.getElementById('stat-recaudado').textContent = '$' + recaudado.toLocaleString('es-MX');
-  const pct = config.total > 0 ? Math.round((boletos.length/config.total)*100) : 0;
+  document.getElementById('stat-recaudado').textContent = '$'+recaudado.toLocaleString('es-MX');
+  const pct = config.total>0 ? Math.round((boletos.length/config.total)*100) : 0;
   document.getElementById('pct-label').textContent = pct+'%';
   document.getElementById('progress-fill').style.width = pct+'%';
-  const ml=document.getElementById('max-label'); if(ml) ml.textContent=config.total;
+  const ml=document.getElementById('max-label'); if(ml) ml.textContent=config.total||500;
 }
 
-// ====================================================================
-// LISTA — corrige #1 (XSS): usa esc() en todos los campos de usuario
-// ====================================================================
+// =====================================================================
+// LISTA
+// =====================================================================
 function renderLista() {
-  const q = (document.getElementById('search-input').value||'').toLowerCase();
-  const filtered = boletos.filter(b =>
-    b.nombre.toLowerCase().includes(q) ||
-    String(b.numero).includes(q) ||
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  const filtered=boletos.filter(b=>
+    b.nombre.toLowerCase().includes(q)||
+    String(b.numero).includes(q)||
     (b.vendedor||'').toLowerCase().includes(q)
-  ).sort((a,b)=>a.numero-b.numero);
-  const el = document.getElementById('lista-boletos');
-  if (!filtered.length) {
-    el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div>Sin boletos registrados</div>';
-    return;
-  }
-  el.innerHTML = filtered.map(b => `
+  );
+  const el=document.getElementById('lista-boletos');
+  if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div>Sin boletos registrados</div>'; return; }
+  el.innerHTML=filtered.map(b=>`
     <div class="boleto-row" onclick="verDetalle(${b.numero})">
       <div class="boleto-badge">${String(b.numero).padStart(3,'0')}</div>
       <div class="boleto-info">
@@ -739,479 +721,419 @@ function renderLista() {
     </div>`).join('');
 }
 
-// ====================================================================
-// REGISTRAR — corrige #6 (validación teléfono)
-// ====================================================================
-function registrarBoleto() {
-  const nombre  = document.getElementById('f-nombre').value.trim();
-  const tel     = document.getElementById('f-tel').value.trim();
-  const num     = parseInt(document.getElementById('f-num').value);
-  const vendedor= document.getElementById('f-vendedor').value.trim();
-  const pago    = document.getElementById('f-pago').value;
-  const estado  = document.getElementById('f-estado').value;
-
-  if (!nombre) return toast('Ingresa el nombre del comprador');
+// =====================================================================
+// REGISTRAR BOLETO
+// =====================================================================
+async function registrarBoleto() {
+  const nombre=document.getElementById('f-nombre').value.trim();
+  const tel=document.getElementById('f-tel').value.trim();
+  const num=parseInt(document.getElementById('f-num').value);
+  const vendedor=document.getElementById('f-vendedor').value.trim();
+  const pago=document.getElementById('f-pago').value;
+  const estado=document.getElementById('f-estado').value;
+  if (!nombre) return toast('Ingresa el nombre');
   if (!tel) return toast('Ingresa el teléfono');
-  if (!validarTel(tel)) return toast('Teléfono inválido (solo números, +, guiones)');
-  if (!num || num<1 || num>config.total) return toast('Número de boleto inválido');
-  if (boletos.find(b=>b.numero===num)) return toast('Ese número ya está registrado');
-
-  boletos.push({numero:num, nombre, tel, vendedor, pago, estado, fecha:new Date().toISOString()});
-  save(); updateStats(); renderLista();
-  ['f-nombre','f-tel','f-num','f-vendedor'].forEach(id=>document.getElementById(id).value='');
-  toast('Boleto #'+String(num).padStart(3,'0')+' registrado');
-  innerTab('lista');
+  if (!validarTel(tel)) return toast('Teléfono inválido');
+  if (!num||num<1||num>(config.total||500)) return toast('Número inválido');
+  if (boletos.find(b=>b.numero===num)) return toast('Ese número ya existe');
+  loading(true,'Registrando boleto...');
+  try {
+    const nuevo = {numero:num, nombre, tel, vendedor, pago, estado, fecha:new Date().toISOString()};
+    await sb.post('boletos', nuevo);
+    boletos.push(nuevo);
+    boletos.sort((a,b)=>a.numero-b.numero);
+    updateStats(); renderLista();
+    ['f-nombre','f-tel','f-num','f-vendedor'].forEach(id=>document.getElementById(id).value='');
+    toast('Boleto #'+String(num).padStart(3,'0')+' registrado');
+    innerTab('lista');
+    setSyncStatus(true,'Sincronizado');
+  } catch(e) {
+    toast('Error al registrar: '+e.message);
+    setSyncStatus(false,'Error al guardar');
+  }
+  loading(false);
 }
 
-// ====================================================================
-// DETALLE — corrige #1 (XSS): usa esc() en value de inputs
-// ====================================================================
+// =====================================================================
+// DETALLE & EDICIÓN
+// =====================================================================
 function verDetalle(num) {
-  const b = boletos.find(x=>x.numero===num); if (!b) return;
-  // Usar .value con textContent-safe para los inputs es suficiente;
-  // los value de input no ejecutan JS, pero igualmente escapamos
-  // para evitar romper el HTML del atributo value="..."
-  document.getElementById('modal-content').innerHTML = `
+  const b=boletos.find(x=>x.numero===num); if(!b) return;
+  document.getElementById('modal-content').innerHTML=`
     <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Boleto #${String(b.numero).padStart(3,'0')}</div>
-    <div class="form-group"><label class="form-label">Nombre</label>
-      <input class="form-input" id="edit-nombre" value="${esc(b.nombre)}"></div>
-    <div class="form-group"><label class="form-label">Teléfono</label>
-      <input class="form-input" id="edit-tel" value="${esc(b.tel)}" maxlength="15"></div>
-    <div class="form-group"><label class="form-label">Vendedor</label>
-      <input class="form-input" id="edit-vendedor" value="${esc(b.vendedor||'')}"></div>
+    <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="edit-nombre" value="${esc(b.nombre)}"></div>
+    <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="edit-tel" value="${esc(b.tel)}" maxlength="15"></div>
+    <div class="form-group"><label class="form-label">Vendedor</label><input class="form-input" id="edit-vendedor" value="${esc(b.vendedor||'')}"></div>
     <div class="form-group"><label class="form-label">Forma de pago</label>
-      <select class="form-input" id="edit-pago">
-        <option ${b.pago==='Efectivo'?'selected':''}>Efectivo</option>
-        <option ${b.pago==='Transferencia'?'selected':''}>Transferencia</option>
-      </select></div>
+      <select class="form-input" id="edit-pago"><option ${b.pago==='Efectivo'?'selected':''}>Efectivo</option><option ${b.pago==='Transferencia'?'selected':''}>Transferencia</option></select></div>
     <div class="form-group"><label class="form-label">Estado</label>
-      <select class="form-input" id="edit-estado">
-        <option ${b.estado==='Pagado'?'selected':''}>Pagado</option>
-        <option ${b.estado==='Pendiente'?'selected':''}>Pendiente</option>
-      </select></div>
+      <select class="form-input" id="edit-estado"><option ${b.estado==='Pagado'?'selected':''}>Pagado</option><option ${b.estado==='Pendiente'?'selected':''}>Pendiente</option></select></div>
     <button class="btn btn-success" onclick="saveEdit(${num})">Guardar cambios</button>
-    <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);"
-      onclick="eliminar(${num})">Eliminar boleto</button>`;
+    <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);" onclick="eliminar(${num})">Eliminar boleto</button>`;
   document.getElementById('modal-detalle').classList.add('open');
 }
-
-function saveEdit(num) {
-  const b = boletos.find(x=>x.numero===num); if (!b) return;
-  const tel = document.getElementById('edit-tel').value.trim();
+async function saveEdit(num) {
+  const tel=document.getElementById('edit-tel').value.trim();
   if (!validarTel(tel)) return toast('Teléfono inválido');
-  b.nombre   = document.getElementById('edit-nombre').value.trim();
-  b.tel      = tel;
-  b.vendedor = document.getElementById('edit-vendedor').value.trim();
-  b.pago     = document.getElementById('edit-pago').value;
-  b.estado   = document.getElementById('edit-estado').value;
-  save(); updateStats(); renderLista(); closeModalDirect(); toast('Boleto actualizado');
+  const upd={
+    nombre:document.getElementById('edit-nombre').value.trim(),
+    tel, vendedor:document.getElementById('edit-vendedor').value.trim(),
+    pago:document.getElementById('edit-pago').value,
+    estado:document.getElementById('edit-estado').value
+  };
+  loading(true,'Guardando...');
+  try {
+    await sb.patch('boletos', upd, `?numero=eq.${num}`);
+    const b=boletos.find(x=>x.numero===num);
+    Object.assign(b, upd);
+    updateStats(); renderLista(); closeModalDirect();
+    toast('Boleto actualizado'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); setSyncStatus(false,'Error'); }
+  loading(false);
 }
-
-function eliminar(num) {
+async function eliminar(num) {
   if (!confirm('¿Eliminar boleto #'+num+'?')) return;
-  boletos=boletos.filter(x=>x.numero!==num);
-  save(); updateStats(); renderLista(); closeModalDirect(); toast('Boleto eliminado');
+  loading(true,'Eliminando...');
+  try {
+    await sb.delete('boletos', `?numero=eq.${num}`);
+    boletos=boletos.filter(x=>x.numero!==num);
+    updateStats(); renderLista(); closeModalDirect();
+    toast('Boleto eliminado'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
 function closeModal(e){if(e.target===e.currentTarget)closeModalDirect();}
 function closeModalDirect(){document.getElementById('modal-detalle').classList.remove('open');}
 
-// ====================================================================
-// CONFIG — corrige #4: guardar passHash, no texto plano
-// ====================================================================
+// =====================================================================
+// CONFIG
+// =====================================================================
 function loadConfig() {
-  document.getElementById('cfg-nombre').value = config.nombre;
-  document.getElementById('cfg-premio').value = config.premio;
-  document.getElementById('cfg-precio').value = config.precio;
-  document.getElementById('cfg-total').value  = config.total;
-  document.getElementById('cfg-fecha').value  = config.fecha;
-  document.getElementById('cfg-pass').value   = '';
+  document.getElementById('cfg-nombre').value=config.nombre||'';
+  document.getElementById('cfg-premio').value=config.premio||'';
+  document.getElementById('cfg-precio').value=config.precio||'';
+  document.getElementById('cfg-total').value=config.total||'';
+  document.getElementById('cfg-fecha').value=config.fecha||'';
+  document.getElementById('cfg-pass').value='';
 }
-
 async function guardarConfig() {
-  config.nombre  = document.getElementById('cfg-nombre').value.trim() || config.nombre;
-  config.premio  = document.getElementById('cfg-premio').value.trim() || config.premio;
-  config.precio  = parseFloat(document.getElementById('cfg-precio').value) || config.precio;
-  config.total   = parseInt(document.getElementById('cfg-total').value)   || config.total;
-  config.fecha   = document.getElementById('cfg-fecha').value;
-
-  const np = document.getElementById('cfg-pass').value.trim();
-  if (np.length > 0 && np.length < 6) {
-    return toast('La contraseña debe tener al menos 6 caracteres');
-  }
-  if (np.length >= 6) {
-    config.passHash = await hashPass(np);
-    toast('Configuración y contraseña guardadas');
-  } else {
-    toast('Configuración guardada');
-  }
-  save(); updateStats(); updateHero();
-}
-
-function borrarTodo() {
-  if (!confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) return;
-  boletos=[]; ganador=null; imagenes=[]; faqs=[]; procesoTexto='';
-  save(); saveImages(); updateStats(); renderLista(); toast('Datos borrados');
-}
-
-// ====================================================================
-// GALERÍA — corrige #5: indicador de almacenamiento
-// ====================================================================
-function updateStorageBar() {
+  const np=document.getElementById('cfg-pass').value.trim();
+  if (np.length>0&&np.length<6) return toast('Contraseña mínimo 6 caracteres');
+  const upd={
+    nombre:document.getElementById('cfg-nombre').value.trim()||config.nombre,
+    premio:document.getElementById('cfg-premio').value.trim()||config.premio,
+    precio:parseFloat(document.getElementById('cfg-precio').value)||config.precio,
+    total:parseInt(document.getElementById('cfg-total').value)||config.total,
+    fecha:document.getElementById('cfg-fecha').value,
+  };
+  if (np.length>=6) upd.pass_hash = await hashPass(np);
+  loading(true,'Guardando configuración...');
   try {
-    let total = 0;
-    for (let k in localStorage) {
-      if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length * 2);
-    }
-    const pct = Math.min(100, Math.round((total / (5*1024*1024)) * 100));
-    const kb = Math.round(total / 1024);
-    document.getElementById('storage-label').textContent =
-      `Almacenamiento usado: ~${kb} KB de ~5,120 KB (${pct}%)`;
-    const fill = document.getElementById('storage-fill');
-    fill.style.width = pct+'%';
-    fill.style.background = pct > 80 ? 'var(--danger)' : pct > 60 ? 'var(--accent3)' : 'var(--accent2)';
-    if (pct > 85) {
-      document.getElementById('storage-label').style.color = 'var(--accent3)';
-    }
-  } catch(e) {}
+    await sb.patch('config', upd, '?id=eq.1');
+    Object.assign(config, upd);
+    updateHero(); updateStats();
+    toast(np.length>=6 ? 'Config y contraseña guardadas' : 'Configuración guardada');
+    setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); setSyncStatus(false,'Error'); }
+  loading(false);
+}
+async function borrarTodo() {
+  if (!confirm('¿Borrar TODOS los boletos y el ganador? Esta acción no se puede deshacer.')) return;
+  loading(true,'Borrando...');
+  try {
+    await sb.delete('boletos','?numero=gt.0');
+    await sb.patch('ganador',{numero:null,nombre:null,tel:null},'?id=eq.1');
+    boletos=[]; ganador=null;
+    updateStats(); renderLista();
+    document.getElementById('winner-card').classList.remove('show');
+    document.getElementById('drum-display').textContent='???';
+    document.getElementById('drum-display').className='drum-display';
+    document.getElementById('drum-sub').textContent='Pendiente de realizar';
+    document.getElementById('drum-sub').className='drum-sub';
+    toast('Datos borrados'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
 
+// =====================================================================
+// GALERÍA (local por dispositivo)
+// =====================================================================
 function subirImagenes(e) {
-  const files = Array.from(e.target.files);
-  let procesados = 0;
-  files.forEach(file => {
-    if (file.size > 2*1024*1024) { toast('Imagen muy grande: '+file.name+' (máx 2 MB)'); procesados++; return; }
-    const reader = new FileReader();
-    reader.onload = ev => {
+  const files=Array.from(e.target.files);
+  files.forEach(file=>{
+    if (file.size>2*1024*1024) { toast('Imagen muy grande: '+file.name); return; }
+    const r=new FileReader();
+    r.onload=ev=>{
       imagenes.push(ev.target.result);
-      procesados++;
-      if (procesados === files.length) {
-        const ok = saveImages();
-        if (!ok) { imagenes.pop(); }
-        else { renderGaleriaAdmin(); renderGaleria(); updateStorageBar(); toast('Foto(s) agregada(s)'); }
-      }
+      try { localStorage.setItem('rifa_imagenes',JSON.stringify(imagenes)); } catch(err) { toast('Sin espacio para más fotos'); imagenes.pop(); return; }
+      renderGaleriaAdmin(); renderGaleria(); toast('Foto agregada');
     };
-    reader.onerror = () => { procesados++; toast('Error leyendo: '+file.name); };
-    reader.readAsDataURL(file);
+    r.readAsDataURL(file);
   });
   e.target.value='';
 }
-
-// Corrige #9: un solo bloque vacío en galería pública
 function renderGaleria() {
-  const el = document.getElementById('galeria-publica');
-  const counter = document.getElementById('galeria-counter');
-  if (!imagenes.length) {
-    el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>';
-    counter.textContent='';
-    return;
-  }
-  el.innerHTML = imagenes.map(src =>
-    `<img class="galeria-img" src="${src}" alt="Vehículo" onclick="openLightbox(this.src)">`
-  ).join('');
-  counter.textContent = imagenes.length+' foto(s) · Toca para ampliar';
+  const el=document.getElementById('galeria-publica');
+  const counter=document.getElementById('galeria-counter');
+  if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>'; counter.textContent=''; return; }
+  el.innerHTML=imagenes.map(src=>`<img class="galeria-img" src="${src}" alt="Vehículo" onclick="openLightbox(this.src)">`).join('');
+  counter.textContent=imagenes.length+' foto(s) · Toca para ampliar';
 }
-
 function renderGaleriaAdmin() {
-  const el = document.getElementById('galeria-admin-grid');
-  if (!imagenes.length) {
-    el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>'; return;
-  }
-  el.innerHTML = imagenes.map((src,i) => `
+  const el=document.getElementById('galeria-admin-grid');
+  if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>'; return; }
+  el.innerHTML=imagenes.map((src,i)=>`
     <div style="position:relative;">
       <img class="galeria-img" src="${src}" alt="Foto ${i+1}" onclick="openLightbox(this.src)">
-      <button onclick="eliminarImagen(${i})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;line-height:1;">✕</button>
+      <button onclick="eliminarImagen(${i})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
     </div>`).join('');
 }
-
 function eliminarImagen(i) {
-  if (!confirm('¿Eliminar esta foto?')) return;
-  imagenes.splice(i,1); saveImages(); renderGaleriaAdmin(); renderGaleria(); updateStorageBar(); toast('Foto eliminada');
+  if (!confirm('¿Eliminar foto?')) return;
+  imagenes.splice(i,1);
+  localStorage.setItem('rifa_imagenes',JSON.stringify(imagenes));
+  renderGaleriaAdmin(); renderGaleria(); toast('Foto eliminada');
 }
-function openLightbox(src){ document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
-// ====================================================================
-// FAQ — corrige #2 (XSS): usa esc() en p y r
-// ====================================================================
+// =====================================================================
+// FAQ
+// =====================================================================
 function loadContenido() {
   renderFaqAdmin();
-  document.getElementById('proceso-editor').value = procesoTexto;
-  document.getElementById('privacidad-editor').value = privacidadTexto;
+  document.getElementById('proceso-editor').value=procesoTexto;
+  document.getElementById('privacidad-editor').value=privacidadTexto;
 }
-
-function agregarFaq() {
-  const p = document.getElementById('faq-nueva-p').value.trim();
-  const r = document.getElementById('faq-nueva-r').value.trim();
+async function agregarFaq() {
+  const p=document.getElementById('faq-nueva-p').value.trim();
+  const r=document.getElementById('faq-nueva-r').value.trim();
   if (!p||!r) return toast('Completa pregunta y respuesta');
-  faqs.push({p,r});
-  save(); renderFaqAdmin(); renderFaqPublica();
-  document.getElementById('faq-nueva-p').value='';
-  document.getElementById('faq-nueva-r').value='';
-  toast('Pregunta agregada');
+  loading(true,'Guardando pregunta...');
+  try {
+    const nueva=await sb.post('faqs',{pregunta:p,respuesta:r,orden:faqs.length});
+    faqs.push(nueva[0]||{pregunta:p,respuesta:r});
+    renderFaqAdmin(); renderFaqPublica();
+    document.getElementById('faq-nueva-p').value='';
+    document.getElementById('faq-nueva-r').value='';
+    toast('Pregunta agregada'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
-
-function eliminarFaq(i) {
-  if (!confirm('¿Eliminar esta pregunta?')) return;
-  faqs.splice(i,1); save(); renderFaqAdmin(); renderFaqPublica(); toast('Pregunta eliminada');
+async function eliminarFaq(id) {
+  if (!confirm('¿Eliminar pregunta?')) return;
+  loading(true,'Eliminando...');
+  try {
+    await sb.delete('faqs',`?id=eq.${id}`);
+    faqs=faqs.filter(f=>f.id!==id);
+    renderFaqAdmin(); renderFaqPublica(); toast('Pregunta eliminada');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
-
 function renderFaqAdmin() {
-  const el = document.getElementById('faq-admin-lista');
+  const el=document.getElementById('faq-admin-lista');
   if (!faqs.length) { el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Sin preguntas aún</div>'; return; }
-  el.innerHTML = faqs.map((f,i) => `
+  el.innerHTML=faqs.map(f=>`
     <div class="faq-edit-row">
-      <div style="font-size:13px;font-weight:500;">${esc(f.p)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${esc(f.r)}</div>
+      <div style="font-size:13px;font-weight:500;">${esc(f.pregunta)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${esc(f.respuesta)}</div>
       <div class="faq-edit-controls">
-        <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger);" onclick="eliminarFaq(${i})">Eliminar</button>
+        <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger);" onclick="eliminarFaq(${f.id})">Eliminar</button>
       </div>
     </div>`).join('');
 }
-
 function renderFaqPublica() {
-  const el = document.getElementById('faq-lista-publica');
-  const empty = document.getElementById('faq-empty');
+  const el=document.getElementById('faq-lista-publica');
+  const empty=document.getElementById('faq-empty');
   if (!faqs.length) { el.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  el.innerHTML = faqs.map((f,i) => `
+  el.innerHTML=faqs.map((f,i)=>`
     <div class="faq-item" id="faq-${i}">
       <div class="faq-question" onclick="toggleFaq(${i})">
-        <span>${esc(f.p)}</span><span class="faq-arrow">▼</span>
+        <span>${esc(f.pregunta)}</span><span class="faq-arrow">▼</span>
       </div>
-      <div class="faq-answer">${esc(f.r)}</div>
+      <div class="faq-answer">${esc(f.respuesta)}</div>
     </div>`).join('');
 }
+function toggleFaq(i){document.getElementById('faq-'+i).classList.toggle('open');}
 
-function toggleFaq(i) {
-  document.getElementById('faq-'+i).classList.toggle('open');
-}
-
-// ====================================================================
+// =====================================================================
 // PROCESO Y PRIVACIDAD
-// ====================================================================
-function guardarProceso() {
-  procesoTexto = document.getElementById('proceso-editor').value;
-  save(); renderProceso(); toast('Texto guardado');
+// =====================================================================
+async function guardarProceso() {
+  procesoTexto=document.getElementById('proceso-editor').value;
+  loading(true,'Guardando...');
+  try {
+    await sb.patch('contenido',{proceso:procesoTexto},'?id=eq.1');
+    renderProceso(); toast('Texto guardado'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
 function renderProceso() {
-  document.getElementById('proceso-publico').textContent =
-    procesoTexto || 'El administrador publicará esta información próximamente.';
+  document.getElementById('proceso-publico').textContent=procesoTexto||'El administrador publicará esta información próximamente.';
 }
-function guardarPrivacidad() {
-  privacidadTexto = document.getElementById('privacidad-editor').value;
-  save(); renderPrivacidad(); toast('Aviso guardado');
+async function guardarPrivacidad() {
+  privacidadTexto=document.getElementById('privacidad-editor').value;
+  loading(true,'Guardando...');
+  try {
+    await sb.patch('contenido',{privacidad:privacidadTexto},'?id=eq.1');
+    renderPrivacidad(); toast('Aviso guardado'); setSyncStatus(true,'Sincronizado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
 function renderPrivacidad() {
-  document.getElementById('privacidad-texto').textContent =
-    privacidadTexto || 'El aviso de privacidad será publicado próximamente.';
+  document.getElementById('privacidad-texto').textContent=privacidadTexto||'El aviso de privacidad será publicado próximamente.';
 }
 
-// ====================================================================
+// =====================================================================
 // BOLETO COMPRADOR
-// ====================================================================
-function normalizar(s) {
-  return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+// =====================================================================
+async function buscarBoleto() {
+  const num=parseInt(document.getElementById('buscar-num').value);
+  const nombreInput=document.getElementById('buscar-nombre').value;
+  const hint=document.getElementById('hint-box');
+  const el=document.getElementById('boleto-result');
+  if (!num||!nombreInput.trim()) { hint.classList.remove('show'); el.innerHTML=''; return toast('Completa número y nombre'); }
+  loading(true,'Buscando...');
+  try {
+    const res=await sb.get('boletos',`?numero=eq.${num}`);
+    loading(false);
+    const b=res&&res.length?res[0]:null;
+    if (!b||normalizar(b.nombre)!==normalizar(nombreInput)) { hint.classList.add('show'); el.innerHTML=''; return; }
+    hint.classList.remove('show');
+    const fechaSorteo=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}):'Por definir';
+    const wrap=document.createElement('div');
+    wrap.innerHTML=`
+      <div class="ticket-wrap">
+        <div class="ticket-header">
+          <div class="ticket-event"></div><div class="ticket-title"></div><div class="ticket-date"></div>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-body">
+          <div class="ticket-num-label">Número de boleto</div>
+          <div class="ticket-num" id="t-num"></div>
+          <div class="ticket-holder" id="t-holder"></div>
+          <div class="qr-container" id="qr-box-${b.numero}"></div>
+          <div><span class="ticket-status"><span style="width:6px;height:6px;background:var(--accent2);border-radius:50%;display:inline-block;"></span><span id="t-estado"></span></span></div>
+        </div>
+        <div class="ticket-footer">
+          <div><div class="ticket-footer-lbl">Pago</div><div class="ticket-footer-val" id="t-pago"></div></div>
+          <div><div class="ticket-footer-lbl">Precio</div><div class="ticket-footer-val" id="t-precio"></div></div>
+          <div><div class="ticket-footer-lbl">Sorteo</div><div class="ticket-footer-val" id="t-fecha"></div></div>
+        </div>
+      </div>`;
+    wrap.querySelector('.ticket-event').textContent=config.nombre;
+    wrap.querySelector('.ticket-title').textContent=config.premio;
+    wrap.querySelector('.ticket-date').textContent='Sorteo: '+fechaSorteo;
+    wrap.querySelector('#t-num').textContent=String(b.numero).padStart(3,'0');
+    wrap.querySelector('#t-holder').textContent=b.nombre;
+    wrap.querySelector('#t-estado').textContent=b.estado;
+    wrap.querySelector('#t-pago').textContent=b.pago;
+    wrap.querySelector('#t-precio').textContent='$'+Number(config.precio).toLocaleString('es-MX');
+    wrap.querySelector('#t-fecha').textContent=fechaSorteo;
+    const btn=document.createElement('button');
+    btn.className='btn btn-success'; btn.textContent='Compartir por WhatsApp';
+    btn.onclick=()=>compartirBoleto(b);
+    el.innerHTML=''; el.appendChild(wrap); el.appendChild(btn);
+    setTimeout(()=>{
+      const qrEl=document.getElementById('qr-box-'+b.numero);
+      if (qrEl&&typeof QRCode!=='undefined') new QRCode(qrEl,{text:`Boleto ${b.numero} - ${b.nombre} - ${config.nombre}`,width:80,height:80,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    },100);
+  } catch(e) { loading(false); toast('Error de conexión'); }
 }
-
-function buscarBoleto() {
-  const num = parseInt(document.getElementById('buscar-num').value);
-  const nombreInput = document.getElementById('buscar-nombre').value;
-  const hint = document.getElementById('hint-box');
-  const el = document.getElementById('boleto-result');
-
-  if (!num || !nombreInput.trim()) {
-    hint.classList.remove('show'); el.innerHTML='';
-    return toast('Completa número y nombre');
-  }
-
-  const b = boletos.find(x=>x.numero===num);
-  if (!b || normalizar(b.nombre) !== normalizar(nombreInput)) {
-    hint.classList.add('show'); el.innerHTML=''; return;
-  }
-
-  hint.classList.remove('show');
-  const fechaSorteo = config.fecha
-    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
-    : 'Por definir';
-
-  // Ticket con textContent para campos de usuario (no innerHTML con datos)
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `
-    <div class="ticket-wrap">
-      <div class="ticket-header">
-        <div class="ticket-event"></div>
-        <div class="ticket-title"></div>
-        <div class="ticket-date"></div>
-      </div>
-      <div class="ticket-divider"></div>
-      <div class="ticket-body">
-        <div class="ticket-num-label">Número de boleto</div>
-        <div class="ticket-num" id="t-num"></div>
-        <div class="ticket-holder" id="t-holder"></div>
-        <div class="qr-container" id="qr-box-${b.numero}"></div>
-        <div><span class="ticket-status">
-          <span style="width:6px;height:6px;background:var(--accent2);border-radius:50%;display:inline-block;"></span>
-          <span id="t-estado"></span>
-        </span></div>
-      </div>
-      <div class="ticket-footer">
-        <div><div class="ticket-footer-lbl">Forma de pago</div><div class="ticket-footer-val" id="t-pago"></div></div>
-        <div><div class="ticket-footer-lbl">Precio</div><div class="ticket-footer-val" id="t-precio"></div></div>
-        <div><div class="ticket-footer-lbl">Sorteo</div><div class="ticket-footer-val" id="t-fecha"></div></div>
-      </div>
-    </div>`;
-
-  // Asignar con textContent — nunca con innerHTML para datos de usuario
-  wrap.querySelector('.ticket-event').textContent = config.nombre;
-  wrap.querySelector('.ticket-title').textContent = config.premio;
-  wrap.querySelector('.ticket-date').textContent = 'Sorteo: '+fechaSorteo;
-  wrap.querySelector('#t-num').textContent = String(b.numero).padStart(3,'0');
-  wrap.querySelector('#t-holder').textContent = b.nombre;
-  wrap.querySelector('#t-estado').textContent = b.estado;
-  wrap.querySelector('#t-pago').textContent = b.pago;
-  wrap.querySelector('#t-precio').textContent = '$'+Number(config.precio).toLocaleString('es-MX');
-  wrap.querySelector('#t-fecha').textContent = fechaSorteo;
-
-  const btnShare = document.createElement('button');
-  btnShare.className = 'btn btn-success';
-  btnShare.textContent = 'Compartir por WhatsApp';
-  btnShare.onclick = () => compartirBoleto(b.numero);
-
-  el.innerHTML='';
-  el.appendChild(wrap);
-  el.appendChild(btnShare);
-
-  setTimeout(()=>{
-    const qrEl = document.getElementById('qr-box-'+b.numero);
-    if (qrEl && typeof QRCode !== 'undefined') {
-      new QRCode(qrEl, {
-        text:`Boleto ${b.numero} - ${b.nombre} - ${config.nombre}`,
-        width:80, height:80, colorDark:'#000', colorLight:'#fff',
-        correctLevel:QRCode.CorrectLevel.M
-      });
-    }
-  },100);
-}
-
-function compartirBoleto(num) {
-  const b = boletos.find(x=>x.numero===num); if (!b) return;
-  const fechaS = config.fecha
-    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
-    : 'por confirmar';
-  const msg = `🎟 *${config.nombre}*\n\nBoleto: *${String(b.numero).padStart(3,'0')}*\nNombre: ${b.nombre}\nPremio: ${config.premio}\nSorteo: ${fechaS}\nEstado: ${b.estado}\n\n¡Mucha suerte! 🍀`;
+function compartirBoleto(b) {
+  const fechaS=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}):'por confirmar';
+  const msg=`🎟 *${config.nombre}*\n\nBoleto: *${String(b.numero).padStart(3,'0')}*\nNombre: ${b.nombre}\nPremio: ${config.premio}\nSorteo: ${fechaS}\nEstado: ${b.estado}\n\n¡Mucha suerte! 🍀`;
   window.open('https://wa.me/?text='+encodeURIComponent(msg));
 }
 
-// ====================================================================
-// SORTEO — corrige #3: sorteo con un solo número (animación = ganador)
-// ====================================================================
+// =====================================================================
+// SORTEO
+// =====================================================================
 function updateSorteoInfo() {
-  const pagados = boletos.filter(b=>b.estado==='Pagado').length;
-  document.getElementById('s-participantes').textContent = pagados;
-  document.getElementById('s-premio').textContent = config.premio||'—';
-  document.getElementById('s-fecha').textContent = config.fecha
-    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '—';
-  if (ganador) {
-    document.getElementById('drum-display').textContent = String(ganador.numero).padStart(3,'0');
-    document.getElementById('drum-display').className = 'drum-display winner';
-    document.getElementById('drum-sub').textContent = ganador.nombre;
-    document.getElementById('drum-sub').className = 'drum-sub winner-name';
-    document.getElementById('w-num').textContent = String(ganador.numero).padStart(3,'0');
-    document.getElementById('w-name').textContent = ganador.nombre;
-    document.getElementById('w-tel').textContent = ganador.tel;
+  const pagados=boletos.filter(b=>b.estado==='Pagado').length;
+  document.getElementById('s-participantes').textContent=pagados;
+  document.getElementById('s-premio').textContent=config.premio||'—';
+  document.getElementById('s-fecha').textContent=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'—';
+  if (ganador&&ganador.numero) {
+    document.getElementById('drum-display').textContent=String(ganador.numero).padStart(3,'0');
+    document.getElementById('drum-display').className='drum-display winner';
+    document.getElementById('drum-sub').textContent=ganador.nombre||'';
+    document.getElementById('drum-sub').className='drum-sub winner-name';
+    document.getElementById('w-num').textContent=String(ganador.numero).padStart(3,'0');
+    document.getElementById('w-name').textContent=ganador.nombre||'';
+    document.getElementById('w-tel').textContent=ganador.tel||'';
     document.getElementById('winner-card').classList.add('show');
   }
 }
-
 let countdownInterval;
 function startCountdown() {
   if (countdownInterval) clearInterval(countdownInterval);
   function tick() {
-    if (!config.fecha) {
-      ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='--');
-      return;
-    }
-    const diff = new Date(config.fecha) - new Date();
-    if (diff <= 0) {
-      ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='00');
-      return;
-    }
-    document.getElementById('cd-dias').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
-    document.getElementById('cd-hrs').textContent  = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
-    document.getElementById('cd-min').textContent  = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-    document.getElementById('cd-seg').textContent  = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+    if (!config.fecha) { ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='--'); return; }
+    const diff=new Date(config.fecha)-new Date();
+    if (diff<=0) { ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='00'); return; }
+    document.getElementById('cd-dias').textContent=String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('cd-hrs').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('cd-min').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('cd-seg').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
   }
-  tick(); countdownInterval = setInterval(tick, 1000);
+  tick(); countdownInterval=setInterval(tick,1000);
 }
-
-function realizarSorteo() {
-  const pagados = boletos.filter(b=>b.estado==='Pagado');
+async function realizarSorteo() {
+  const pagados=boletos.filter(b=>b.estado==='Pagado');
   if (!pagados.length) return toast('No hay boletos con estado Pagado');
-  if (ganador && !confirm('Ya existe un ganador registrado. ¿Realizar nuevo sorteo y reemplazarlo?')) return;
-
-  // Elegir ganador ANTES de la animación — corrige #3
-  const winner = pagados[Math.floor(Math.random()*pagados.length)];
-
-  const drum = document.getElementById('drum-display');
-  const sub  = document.getElementById('drum-sub');
-  drum.className = 'drum-display spinning';
-  sub.textContent = 'Sorteando...'; sub.className = 'drum-sub';
+  if (ganador&&ganador.numero&&!confirm('Ya existe un ganador. ¿Nuevo sorteo?')) return;
+  const winner=pagados[Math.floor(Math.random()*pagados.length)];
+  const drum=document.getElementById('drum-display');
+  const sub=document.getElementById('drum-sub');
+  drum.className='drum-display spinning'; sub.textContent='Sorteando...'; sub.className='drum-sub';
   document.getElementById('winner-card').classList.remove('show');
-  document.getElementById('btn-sorteo').disabled = true;
-
-  let i = 0;
-  const decoy = [...pagados].filter(b=>b.numero!==winner.numero);
-  const pool  = decoy.length > 0 ? decoy : pagados;
-
-  const iv = setInterval(()=>{
-    // Mostrar números aleatorios distintos al ganador durante la animación
-    if (i < 28) {
-      const r = pool[Math.floor(Math.random()*pool.length)];
-      drum.textContent = String(r.numero).padStart(3,'0');
-    } else if (i === 28) {
-      // Últimas 3 iteraciones: converger al ganador
-      drum.textContent = '...';
-    } else if (i >= 30) {
+  document.getElementById('btn-sorteo').disabled=true;
+  let i=0;
+  const decoy=pagados.filter(b=>b.numero!==winner.numero);
+  const pool=decoy.length>0?decoy:pagados;
+  const iv=setInterval(async()=>{
+    if (i<28) drum.textContent=String(pool[Math.floor(Math.random()*pool.length)].numero).padStart(3,'0');
+    else if (i===28) drum.textContent='...';
+    else if (i>=30) {
       clearInterval(iv);
-      ganador = winner; save();
-      drum.textContent = String(winner.numero).padStart(3,'0');
-      drum.className = 'drum-display winner';
-      sub.textContent = winner.nombre; sub.className = 'drum-sub winner-name';
-      document.getElementById('w-num').textContent = String(winner.numero).padStart(3,'0');
-      document.getElementById('w-name').textContent = winner.nombre;
-      document.getElementById('w-tel').textContent = winner.tel;
+      try {
+        await sb.patch('ganador',{numero:winner.numero,nombre:winner.nombre,tel:winner.tel},'?id=eq.1');
+        ganador=winner;
+      } catch(e) { toast('Advertencia: ganador no guardado en servidor'); ganador=winner; }
+      drum.textContent=String(winner.numero).padStart(3,'0');
+      drum.className='drum-display winner'; sub.textContent=winner.nombre; sub.className='drum-sub winner-name';
+      document.getElementById('w-num').textContent=String(winner.numero).padStart(3,'0');
+      document.getElementById('w-name').textContent=winner.nombre;
+      document.getElementById('w-tel').textContent=winner.tel;
       document.getElementById('winner-card').classList.add('show');
-      document.getElementById('btn-sorteo').disabled = false;
+      document.getElementById('btn-sorteo').disabled=false;
       toast('Ganador: '+winner.nombre);
     }
     i++;
-  }, 80);
+  },80);
+}
+async function resetSorteo() {
+  if (!confirm('¿Reiniciar resultado del sorteo?')) return;
+  loading(true,'Reiniciando...');
+  try {
+    await sb.patch('ganador',{numero:null,nombre:null,tel:null},'?id=eq.1');
+    ganador=null;
+    document.getElementById('drum-display').textContent='???';
+    document.getElementById('drum-display').className='drum-display';
+    document.getElementById('drum-sub').textContent='Pendiente de realizar';
+    document.getElementById('drum-sub').className='drum-sub';
+    document.getElementById('winner-card').classList.remove('show');
+    toast('Sorteo reiniciado');
+  } catch(e) { toast('Error: '+e.message); }
+  loading(false);
 }
 
-function resetSorteo() {
-  if (!confirm('¿Reiniciar el resultado del sorteo?')) return;
-  ganador = null; save();
-  document.getElementById('drum-display').textContent = '???';
-  document.getElementById('drum-display').className = 'drum-display';
-  document.getElementById('drum-sub').textContent = 'Pendiente de realizar';
-  document.getElementById('drum-sub').className = 'drum-sub';
-  document.getElementById('winner-card').classList.remove('show');
-}
-
-// ====================================================================
-// TOAST
-// ====================================================================
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
-}
-
-// ====================================================================
+// =====================================================================
 // INIT
-// ====================================================================
-updateHero(); renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad();
-startCountdown();
+// =====================================================================
+recargarTodo();
 </script>
 </body>
 </html>
