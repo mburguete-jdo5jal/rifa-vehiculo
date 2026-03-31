@@ -6,6 +6,8 @@
 <title>Rifa Vehículo 2025</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Supabase JS SDK — maneja Auth de forma segura -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c28;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0eeff;--muted:#7b7a9a;--accent:#7c6af5;--accent2:#5ee8b0;--accent3:#f5a44a;--danger:#f55a5a;--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--radius:14px;--radius-sm:8px;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -15,8 +17,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .view{display:none;flex:1;flex-direction:column;}
 .view.active{display:flex;}
 
-/* LOADING GLOBAL */
-.loading-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(10,10,15,0.85);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.loading-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(10,10,15,0.88);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
 .loading-overlay.open{display:flex;}
 .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -26,12 +27,13 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .login-screen{display:none;position:fixed;inset:0;z-index:500;background:var(--bg);align-items:center;justify-content:center;padding:24px;}
 .login-screen.open{display:flex;}
 .login-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px 24px;width:100%;max-width:360px;}
-.login-logo{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.login-logo{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
 .login-error{background:rgba(245,90,90,0.12);border:1px solid rgba(245,90,90,0.3);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--danger);margin-bottom:12px;display:none;}
 .login-error.show{display:block;}
 .login-blocked{background:rgba(245,90,90,0.18);border:1px solid rgba(245,90,90,0.4);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--danger);text-align:center;display:none;}
 .login-blocked.show{display:block;}
+.login-info{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;}
 
 /* NAV */
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 10px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
@@ -166,12 +168,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .galeria-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:opacity 0.2s;}
 .galeria-img:hover{opacity:0.85;}
 .galeria-empty-single{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:32px;text-align:center;font-size:12px;color:var(--muted);grid-column:span 2;}
-.upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:12px;}
-.upload-area:hover{border-color:var(--accent);}
-.upload-icon{font-size:28px;margin-bottom:8px;}
-.upload-label{font-size:13px;color:var(--muted);}
-.upload-sub{font-size:11px;color:var(--muted);margin-top:4px;}
-#file-input{display:none;}
 
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:300;align-items:center;justify-content:center;padding:20px;}
 .lightbox.open{display:flex;}
@@ -197,7 +193,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 .page-section{display:none;}
 .page-section.active{display:block;}
 
-/* Indicador de sincronización */
 .sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--muted);}
 .sync-dot.ok{background:var(--accent2);}
 .sync-dot.err{background:var(--danger);}
@@ -206,19 +201,25 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-msg" id="loading-msg">Conectando...</div>
 </div>
 
-<!-- LOGIN -->
+<!-- LOGIN CON EMAIL Y CONTRASEÑA REAL DE SUPABASE -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">RIFA 2025</div>
     <div class="login-sub">Acceso exclusivo para administrador</div>
     <div class="login-error" id="login-error"></div>
-    <div class="login-blocked" id="login-blocked">Acceso bloqueado por múltiples intentos.<br>Recarga la página para reintentar.</div>
+    <div class="login-blocked" id="login-blocked">
+      Acceso bloqueado por múltiples intentos fallidos.<br>Espera 15 minutos e intenta de nuevo.
+    </div>
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <input class="form-input" id="login-email" type="email" placeholder="admin@correo.com"
+        onkeydown="if(event.key==='Enter') document.getElementById('login-pass').focus()">
+    </div>
     <div class="form-group">
       <label class="form-label">Contraseña</label>
       <input class="form-input" id="login-pass" type="password" placeholder="••••••••"
@@ -226,6 +227,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
     </div>
     <button class="btn btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
     <button class="btn btn-secondary" style="margin-top:8px;" onclick="cancelarLogin()">Cancelar</button>
+    <div class="login-info">El acceso está protegido por Supabase Auth.<br>Los intentos fallidos se bloquean automáticamente.</div>
   </div>
 </div>
 
@@ -270,7 +272,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
       </div>
       <div id="sec-faq" class="page-section">
         <div id="faq-lista-publica"></div>
-        <div class="empty" id="faq-empty" style="display:none;"><div class="empty-icon">💬</div>Sin preguntas agregadas aún</div>
+        <div class="empty" id="faq-empty" style="display:none;"><div class="empty-icon">💬</div>Sin preguntas aún</div>
       </div>
       <div id="sec-privacidad" class="page-section">
         <div class="card"><div class="card-title">Aviso de privacidad</div><div class="privacidad-text" id="privacidad-texto"></div></div>
@@ -360,12 +362,10 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         <button class="inner-tab" onclick="innerTab('contenido')">Contenido</button>
         <button class="inner-tab" onclick="innerTab('config')">Config</button>
       </div>
-
       <div id="panel-lista" class="inner-panel active">
         <input class="search-input" id="search-input" placeholder="Buscar por nombre, número o vendedor..." oninput="renderLista()">
         <div id="lista-boletos"></div>
       </div>
-
       <div id="panel-nuevo" class="inner-panel">
         <div class="card">
           <div class="card-title">Datos del comprador</div>
@@ -380,30 +380,23 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
           <button class="btn btn-primary" onclick="registrarBoleto()">Registrar boleto</button>
         </div>
       </div>
-
       <div id="panel-galeria-admin" class="inner-panel">
         <div class="card">
           <div class="card-title">Imágenes del vehículo</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
-            Las fotos se guardan en la nube y todos las ven. Pega el enlace directo de cada foto
-            (Google Fotos, Imgur, WhatsApp Web, etc).
-          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Pega el enlace directo de cada foto (Imgur, Google Fotos, etc). Todos los administradores las verán.</div>
           <div style="background:rgba(124,106,245,0.08);border:1px solid rgba(124,106,245,0.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
             <strong style="color:var(--text);">¿Cómo obtener el enlace?</strong><br>
-            Google Fotos: abre la foto → compartir → copiar enlace.<br>
-            Imgur: sube la foto en imgur.com → clic derecho → copiar dirección de imagen.<br>
-            WhatsApp Web: abre la foto → clic derecho → copiar dirección de imagen.
+            Imgur (recomendado): sube en imgur.com → clic derecho sobre la imagen → copiar dirección.<br>
+            Google Fotos: abre la foto → compartir → copiar enlace.
           </div>
           <div class="form-group">
-            <label class="form-label">Enlace de la foto (URL)</label>
-            <input class="form-input" id="foto-url" placeholder="https://i.imgur.com/ejemplo.jpg"
-              onkeydown="if(event.key==='Enter') agregarFoto()">
+            <label class="form-label">URL de la foto</label>
+            <input class="form-input" id="foto-url" placeholder="https://i.imgur.com/ejemplo.jpg" onkeydown="if(event.key==='Enter') agregarFoto()">
           </div>
           <button class="btn btn-primary" onclick="agregarFoto()">Agregar foto</button>
           <div id="galeria-admin-grid" class="galeria-grid" style="margin-top:16px;"></div>
         </div>
       </div>
-
       <div id="panel-contenido" class="inner-panel">
         <div class="card">
           <div class="card-title">Preguntas frecuentes</div>
@@ -414,7 +407,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
         </div>
         <div class="card">
           <div class="card-title">Texto de transparencia</div>
-          <div class="form-group"><textarea class="form-input" id="proceso-editor" style="min-height:160px;" placeholder="Explica cómo funciona la rifa, quién organiza, cómo se realiza el sorteo..."></textarea></div>
+          <div class="form-group"><textarea class="form-input" id="proceso-editor" style="min-height:160px;" placeholder="Explica cómo funciona la rifa..."></textarea></div>
           <button class="btn btn-primary" onclick="guardarProceso()">Guardar</button>
         </div>
         <div class="card">
@@ -423,7 +416,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
           <button class="btn btn-primary" onclick="guardarPrivacidad()">Guardar</button>
         </div>
       </div>
-
       <div id="panel-config" class="inner-panel">
         <div class="card">
           <div class="card-title">Configuración de la rifa</div>
@@ -432,9 +424,8 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
           <div class="form-group"><label class="form-label">Precio por boleto ($)</label><input class="form-input" id="cfg-precio" type="number"></div>
           <div class="form-group"><label class="form-label">Total de boletos</label><input class="form-input" id="cfg-total" type="number"></div>
           <div class="form-group"><label class="form-label">Fecha del sorteo</label><input class="form-input" id="cfg-fecha" type="datetime-local"></div>
-          <div class="form-group">
-            <label class="form-label">Nueva contraseña de administrador (mín. 6 caracteres)</label>
-            <input class="form-input" id="cfg-pass" type="password" placeholder="Dejar en blanco para no cambiar">
+          <div style="background:rgba(94,232,176,0.08);border:1px solid rgba(94,232,176,0.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:12px;">
+            Para cambiar la contraseña de acceso, hazlo directamente en <strong style="color:var(--accent2);">supabase.com → Authentication → Users</strong>.
           </div>
           <button class="btn btn-primary" onclick="guardarConfig()">Guardar configuración</button>
           <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);" onclick="borrarTodo()">Borrar todos los datos</button>
@@ -444,7 +435,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modal-detalle" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -454,7 +444,6 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
   </div>
 </div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt="Foto vehículo">
@@ -464,211 +453,189 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 
 <script>
 // =====================================================================
-// CONFIGURACIÓN SUPABASE
+// SUPABASE — autenticación real con SDK oficial
 // =====================================================================
 const SUPABASE_URL = 'https://siwhfsiyvogkkbtzazmj.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_brrVMMPMXSFih-rOojgcFg_ughPVW66';
+const SUPABASE_ANON_KEY = 'sb_publishable_brrVMMPMXSFih-rOojgcFg_ughPVW66';
 
-// Cliente Supabase REST API
-const sb = {
-  async query(table, method='GET', body=null, params='') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${params}`;
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method==='POST' ? 'return=representation' : (method==='PATCH'||method==='PUT' ? 'return=representation' : '')
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(url, opts);
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err);
-    }
-    const text = await res.text();
-    return text ? JSON.parse(text) : null;
-  },
-  get: (table, params='') => sb.query(table,'GET',null,params),
-  post: (table, body) => sb.query(table,'POST',body),
-  patch: (table, body, params) => sb.query(table,'PATCH',body,params),
-  delete: (table, params) => sb.query(table,'DELETE',null,params),
-};
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================================
-// ESTADO EN MEMORIA
+// ESTADO
 // =====================================================================
 let boletos = [];
-let config = { nombre:'Rifa 2025', premio:'Vehículo', precio:300, total:500, fecha:'', pass_hash:'' };
+let config = { nombre:'Rifa 2025', premio:'Vehículo', precio:300, total:500, fecha:'' };
 let ganador = null;
 let faqs = [];
 let procesoTexto = '';
 let privacidadTexto = `AVISO DE PRIVACIDAD\n\nEl responsable de la presente rifa recaba los siguientes datos personales: nombre completo y teléfono.\n\nFinalidad: administración de boletos e identificación del ganador. Los datos no serán compartidos con terceros.`;
-let imagenes = []; // URLs cargadas desde Supabase
-
-let adminLoggedIn = false;
+let imagenes = [];
+let sesionAdmin = null; // sesión real de Supabase Auth
 let loginAttempts = 0;
 const MAX_ATTEMPTS = 5;
 
 // =====================================================================
 // UTILIDADES
 // =====================================================================
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function validarTel(t){return /^[+\d\s\-]{8,15}$/.test(t);}
+function normalizar(s){return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function loading(show,msg='Procesando...'){
+  document.getElementById('loading-overlay').classList.toggle('open',show);
+  document.getElementById('loading-msg').textContent=msg;
 }
-async function hashPass(p) {
-  const enc = new TextEncoder().encode(p+'rifa_salt_2025');
-  const buf = await crypto.subtle.digest('SHA-256',enc);
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+function setSyncStatus(ok,msg){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  if(!dot)return;
+  dot.className='sync-dot '+(ok?'ok':'err');
+  lbl.textContent=msg;
 }
-function validarTel(t) { return /^[+\d\s\-]{8,15}$/.test(t); }
-function normalizar(s) { return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-
-function loading(show, msg='Guardando...') {
-  document.getElementById('loading-overlay').classList.toggle('open', show);
-  document.getElementById('loading-msg').textContent = msg;
-}
-function setSyncStatus(ok, msg) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  if (!dot) return;
-  dot.className = 'sync-dot ' + (ok ? 'ok' : 'err');
-  lbl.textContent = msg;
-}
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
 
 // =====================================================================
-// CARGA INICIAL DESDE SUPABASE
+// CARGA DE DATOS (lectura pública — no requiere sesión)
 // =====================================================================
-async function recargarTodo() {
-  loading(true, 'Cargando datos...');
+async function recargarTodo(){
+  loading(true,'Cargando datos...');
   try {
-    // Config
-    const cfgData = await sb.get('config', '?id=eq.1');
-    if (cfgData && cfgData.length) config = cfgData[0];
-
-    // Boletos
-    const boletosData = await sb.get('boletos', '?order=numero.asc');
-    boletos = boletosData || [];
-
-    // Ganador
-    const ganadorData = await sb.get('ganador', '?id=eq.1');
-    if (ganadorData && ganadorData.length && ganadorData[0].numero) ganador = ganadorData[0];
-    else ganador = null;
-
-    // FAQs
-    const faqData = await sb.get('faqs', '?order=orden.asc');
-    faqs = faqData || [];
-
-    // Contenido
-    const contData = await sb.get('contenido', '?id=eq.1');
-    if (contData && contData.length) {
-      procesoTexto = contData[0].proceso || '';
-      privacidadTexto = contData[0].privacidad || privacidadTexto;
-    }
-
-    // Fotos
-    const fotosData = await sb.get('fotos', '?order=orden.asc');
-    imagenes = (fotosData || []).map(f => ({ id: f.id, url: f.url }));
-
-    setSyncStatus(true, 'Sincronizado');
+    const [{data:cfg},{data:bols},{data:gan},{data:faqData},{data:cont},{data:fotosData}] = await Promise.all([
+      db.from('config').select('*').eq('id',1).single(),
+      db.from('boletos').select('*').order('numero'),
+      db.from('ganador').select('*').eq('id',1).single(),
+      db.from('faqs').select('*').order('orden'),
+      db.from('contenido').select('*').eq('id',1).single(),
+      db.from('fotos').select('*').order('orden'),
+    ]);
+    if(cfg) config=cfg;
+    boletos=bols||[];
+    ganador=(gan&&gan.numero)?gan:null;
+    faqs=faqData||[];
+    if(cont){procesoTexto=cont.proceso||''; privacidadTexto=cont.privacidad||privacidadTexto;}
+    imagenes=(fotosData||[]).map(f=>({id:f.id,url:f.url}));
+    setSyncStatus(true,'Sincronizado');
     updateHero(); updateStats(); renderLista();
     renderFaqPublica(); renderProceso(); renderPrivacidad();
-    renderGaleria(); updateSorteoInfo();
-    startCountdown();
-  } catch(e) {
-    setSyncStatus(false, 'Error de conexión');
-    toast('Error al conectar con la base de datos');
+    renderGaleria(); updateSorteoInfo(); startCountdown();
+  } catch(e){
+    setSyncStatus(false,'Error de conexión');
+    toast('Error al conectar');
     console.error(e);
   }
   loading(false);
 }
 
 // =====================================================================
-// LOGIN
+// LOGIN REAL CON SUPABASE AUTH
 // =====================================================================
-function checkAdminTab() { if (!adminLoggedIn) openLogin(); }
-function cancelarLogin() {
+function checkAdminTab(){if(!sesionAdmin) openLogin();}
+function cancelarLogin(){
   document.getElementById('login-screen').classList.remove('open');
   goView('info');
 }
-function openLogin() {
+function openLogin(){
   document.getElementById('login-screen').classList.add('open');
-  document.getElementById('login-pass').value = '';
+  document.getElementById('login-pass').value='';
   document.getElementById('login-error').classList.remove('show');
-  document.getElementById('login-error').textContent = '';
-  if (loginAttempts >= MAX_ATTEMPTS) {
+  document.getElementById('login-error').textContent='';
+  if(loginAttempts>=MAX_ATTEMPTS){
     document.getElementById('login-blocked').classList.add('show');
-    document.getElementById('btn-login').disabled = true;
-    document.getElementById('login-pass').disabled = true;
+    document.getElementById('btn-login').disabled=true;
+    document.getElementById('login-pass').disabled=true;
+    document.getElementById('login-email').disabled=true;
   }
 }
-async function doLogin() {
-  if (loginAttempts >= MAX_ATTEMPTS) return;
-  const pass = document.getElementById('login-pass').value;
-  if (!pass) return;
-  const hash = await hashPass(pass);
-  const defaultHash = await hashPass('admin1234');
-  const storedHash = config.pass_hash || defaultHash;
-  if (hash === storedHash) {
-    adminLoggedIn = true; loginAttempts = 0;
-    document.getElementById('login-screen').classList.remove('open');
-    document.getElementById('btn-logout').classList.add('visible');
-    _activateView('admin');
-    updateStats(); renderLista();
-  } else {
-    loginAttempts++;
-    const r = MAX_ATTEMPTS - loginAttempts;
-    const errEl = document.getElementById('login-error');
-    errEl.textContent = r > 0 ? `Contraseña incorrecta. ${r} intento(s) restantes.` : 'Acceso bloqueado.';
-    errEl.classList.add('show');
-    if (r <= 0) {
-      document.getElementById('login-blocked').classList.add('show');
-      document.getElementById('btn-login').disabled = true;
-      document.getElementById('login-pass').disabled = true;
+
+async function doLogin(){
+  if(loginAttempts>=MAX_ATTEMPTS) return;
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass) return;
+  document.getElementById('btn-login').disabled=true;
+  loading(true,'Verificando credenciales...');
+  try {
+    // Login real contra Supabase Auth — el servidor verifica, no el navegador
+    const {data,error}=await db.auth.signInWithPassword({email,password:pass});
+    loading(false);
+    if(error){
+      loginAttempts++;
+      const r=MAX_ATTEMPTS-loginAttempts;
+      const errEl=document.getElementById('login-error');
+      if(r>0){
+        errEl.textContent=`Credenciales incorrectas. ${r} intento(s) restantes.`;
+      } else {
+        errEl.textContent='Acceso bloqueado.';
+        document.getElementById('login-blocked').classList.add('show');
+        document.getElementById('login-email').disabled=true;
+        document.getElementById('login-pass').disabled=true;
+      }
+      errEl.classList.add('show');
+      document.getElementById('login-pass').value='';
+      document.getElementById('btn-login').disabled=(loginAttempts>=MAX_ATTEMPTS);
+    } else {
+      sesionAdmin=data.session;
+      loginAttempts=0;
+      document.getElementById('login-screen').classList.remove('open');
+      document.getElementById('btn-logout').classList.add('visible');
+      document.getElementById('btn-login').disabled=false;
+      _activateView('admin');
+      updateStats(); renderLista();
     }
-    document.getElementById('login-pass').value = '';
+  } catch(e){
+    loading(false);
+    document.getElementById('btn-login').disabled=false;
+    toast('Error de conexión');
   }
 }
-function logout() {
-  if (!confirm('¿Cerrar sesión de administrador?')) return;
-  adminLoggedIn = false;
+
+async function logout(){
+  if(!confirm('¿Cerrar sesión de administrador?')) return;
+  await db.auth.signOut();
+  sesionAdmin=null;
   document.getElementById('btn-logout').classList.remove('visible');
   document.getElementById('sorteo-btns').classList.remove('visible');
   goView('info');
   toast('Sesión cerrada');
 }
 
+// Verificar si ya hay sesión activa al cargar (token guardado en el navegador)
+async function verificarSesion(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session){
+    sesionAdmin=session;
+    document.getElementById('btn-logout').classList.add('visible');
+  }
+}
+
 // =====================================================================
 // NAVEGACIÓN
 // =====================================================================
-function goView(v) {
-  if (v==='admin' && !adminLoggedIn) { checkAdminTab(); return; }
+function goView(v){
+  if(v==='admin'&&!sesionAdmin){checkAdminTab();return;}
   _activateView(v);
 }
-function _activateView(v) {
+function _activateView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   const idx={info:0,boleto:1,sorteo:2,admin:3};
   document.querySelectorAll('.nav-tab')[idx[v]].classList.add('active');
-  if (v==='admin') { updateStats(); renderLista(); }
-  if (v==='sorteo') {
+  if(v==='admin'){updateStats();renderLista();}
+  if(v==='sorteo'){
     updateSorteoInfo();
     const btns=document.getElementById('sorteo-btns');
     const msg=document.getElementById('sorteo-msg-publico');
-    if (adminLoggedIn) { btns.classList.add('visible'); msg.textContent=''; }
-    else { btns.classList.remove('visible'); msg.textContent='El sorteo es realizado por el administrador en la fecha programada.'; }
+    if(sesionAdmin){btns.classList.add('visible');msg.textContent='';}
+    else{btns.classList.remove('visible');msg.textContent='El sorteo es realizado por el administrador en la fecha programada.';}
   }
-  if (v==='info') { renderGaleria(); renderFaqPublica(); renderProceso(); renderPrivacidad(); updateHero(); }
+  if(v==='info'){renderGaleria();renderFaqPublica();renderProceso();renderPrivacidad();updateHero();}
 }
-function pageTab(name) {
+function pageTab(name){
   document.querySelectorAll('.page-tab').forEach((t,i)=>{
     const ns=['galeria','proceso','faq','privacidad'];
     t.classList.toggle('active',ns[i]===name);
@@ -676,45 +643,45 @@ function pageTab(name) {
   document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
 }
-function innerTab(name) {
+function innerTab(name){
   const names=['lista','nuevo','galeria-admin','contenido','config'];
   document.querySelectorAll('.inner-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  if (name==='config') loadConfig();
-  if (name==='galeria-admin') renderGaleriaAdmin();
-  if (name==='contenido') loadContenido();
+  if(name==='config') loadConfig();
+  if(name==='galeria-admin') renderGaleriaAdmin();
+  if(name==='contenido') loadContenido();
 }
 
 // =====================================================================
 // HERO & STATS
 // =====================================================================
-function updateHero() {
-  document.getElementById('hero-evento').textContent = config.nombre||'';
-  document.getElementById('hero-premio').textContent = config.premio||'';
-  document.getElementById('hero-precio').textContent = Number(config.precio||0).toLocaleString('es-MX');
-  document.getElementById('hero-total').textContent = config.total||'';
-  document.getElementById('hero-fecha').textContent = config.fecha
-    ? new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
-    : 'Por definir';
-  document.getElementById('nav-title').textContent = config.nombre||'RIFA 2025';
+function updateHero(){
+  document.getElementById('hero-evento').textContent=config.nombre||'';
+  document.getElementById('hero-premio').textContent=config.premio||'';
+  document.getElementById('hero-precio').textContent=Number(config.precio||0).toLocaleString('es-MX');
+  document.getElementById('hero-total').textContent=config.total||'';
+  document.getElementById('hero-fecha').textContent=config.fecha
+    ?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})
+    :'Por definir';
+  document.getElementById('nav-title').textContent=config.nombre||'RIFA 2025';
 }
-function updateStats() {
-  const libres = Math.max(0,(config.total||500)-boletos.length);
-  const recaudado = boletos.filter(b=>b.estado==='Pagado').length*(config.precio||0);
-  document.getElementById('stat-vendidos').textContent = boletos.length;
-  document.getElementById('stat-libres').textContent = libres;
-  document.getElementById('stat-recaudado').textContent = '$'+recaudado.toLocaleString('es-MX');
-  const pct = config.total>0 ? Math.round((boletos.length/config.total)*100) : 0;
-  document.getElementById('pct-label').textContent = pct+'%';
-  document.getElementById('progress-fill').style.width = pct+'%';
-  const ml=document.getElementById('max-label'); if(ml) ml.textContent=config.total||500;
+function updateStats(){
+  const libres=Math.max(0,(config.total||500)-boletos.length);
+  const recaudado=boletos.filter(b=>b.estado==='Pagado').length*(config.precio||0);
+  document.getElementById('stat-vendidos').textContent=boletos.length;
+  document.getElementById('stat-libres').textContent=libres;
+  document.getElementById('stat-recaudado').textContent='$'+recaudado.toLocaleString('es-MX');
+  const pct=config.total>0?Math.round((boletos.length/config.total)*100):0;
+  document.getElementById('pct-label').textContent=pct+'%';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  const ml=document.getElementById('max-label');if(ml)ml.textContent=config.total||500;
 }
 
 // =====================================================================
 // LISTA
 // =====================================================================
-function renderLista() {
+function renderLista(){
   const q=(document.getElementById('search-input').value||'').toLowerCase();
   const filtered=boletos.filter(b=>
     b.nombre.toLowerCase().includes(q)||
@@ -722,7 +689,7 @@ function renderLista() {
     (b.vendedor||'').toLowerCase().includes(q)
   );
   const el=document.getElementById('lista-boletos');
-  if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div>Sin boletos registrados</div>'; return; }
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div>Sin boletos registrados</div>';return;}
   el.innerHTML=filtered.map(b=>`
     <div class="boleto-row" onclick="verDetalle(${b.numero})">
       <div class="boleto-badge">${String(b.numero).padStart(3,'0')}</div>
@@ -735,43 +702,38 @@ function renderLista() {
 }
 
 // =====================================================================
-// REGISTRAR BOLETO
+// REGISTRAR — usa sesión real, Supabase verifica en servidor
 // =====================================================================
-async function registrarBoleto() {
+async function registrarBoleto(){
+  if(!sesionAdmin) return toast('Sesión expirada. Vuelve a iniciar sesión.');
   const nombre=document.getElementById('f-nombre').value.trim();
   const tel=document.getElementById('f-tel').value.trim();
   const num=parseInt(document.getElementById('f-num').value);
   const vendedor=document.getElementById('f-vendedor').value.trim();
   const pago=document.getElementById('f-pago').value;
   const estado=document.getElementById('f-estado').value;
-  if (!nombre) return toast('Ingresa el nombre');
-  if (!tel) return toast('Ingresa el teléfono');
-  if (!validarTel(tel)) return toast('Teléfono inválido');
-  if (!num||num<1||num>(config.total||500)) return toast('Número inválido');
-  if (boletos.find(b=>b.numero===num)) return toast('Ese número ya existe');
+  if(!nombre) return toast('Ingresa el nombre');
+  if(!tel) return toast('Ingresa el teléfono');
+  if(!validarTel(tel)) return toast('Teléfono inválido');
+  if(!num||num<1||num>(config.total||500)) return toast('Número inválido');
+  if(boletos.find(b=>b.numero===num)) return toast('Ese número ya existe');
   loading(true,'Registrando boleto...');
-  try {
-    const nuevo = {numero:num, nombre, tel, vendedor, pago, estado, fecha:new Date().toISOString()};
-    await sb.post('boletos', nuevo);
-    boletos.push(nuevo);
-    boletos.sort((a,b)=>a.numero-b.numero);
-    updateStats(); renderLista();
-    ['f-nombre','f-tel','f-num','f-vendedor'].forEach(id=>document.getElementById(id).value='');
-    toast('Boleto #'+String(num).padStart(3,'0')+' registrado');
-    innerTab('lista');
-    setSyncStatus(true,'Sincronizado');
-  } catch(e) {
-    toast('Error al registrar: '+e.message);
-    setSyncStatus(false,'Error al guardar');
-  }
+  const {error}=await db.from('boletos').insert({numero:num,nombre,tel,vendedor,pago,estado,fecha:new Date().toISOString()});
   loading(false);
+  if(error){toast('Error: '+error.message);setSyncStatus(false,'Error');return;}
+  boletos.push({numero:num,nombre,tel,vendedor,pago,estado,fecha:new Date().toISOString()});
+  boletos.sort((a,b)=>a.numero-b.numero);
+  updateStats();renderLista();
+  ['f-nombre','f-tel','f-num','f-vendedor'].forEach(id=>document.getElementById(id).value='');
+  toast('Boleto #'+String(num).padStart(3,'0')+' registrado');
+  innerTab('lista');setSyncStatus(true,'Sincronizado');
 }
 
 // =====================================================================
 // DETALLE & EDICIÓN
 // =====================================================================
-function verDetalle(num) {
-  const b=boletos.find(x=>x.numero===num); if(!b) return;
+function verDetalle(num){
+  const b=boletos.find(x=>x.numero===num);if(!b)return;
   document.getElementById('modal-content').innerHTML=`
     <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Boleto #${String(b.numero).padStart(3,'0')}</div>
     <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="edit-nombre" value="${esc(b.nombre)}"></div>
@@ -785,35 +747,29 @@ function verDetalle(num) {
     <button class="btn btn-secondary" style="margin-top:8px;color:var(--danger);border-color:var(--danger);" onclick="eliminar(${num})">Eliminar boleto</button>`;
   document.getElementById('modal-detalle').classList.add('open');
 }
-async function saveEdit(num) {
+async function saveEdit(num){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   const tel=document.getElementById('edit-tel').value.trim();
-  if (!validarTel(tel)) return toast('Teléfono inválido');
-  const upd={
-    nombre:document.getElementById('edit-nombre').value.trim(),
-    tel, vendedor:document.getElementById('edit-vendedor').value.trim(),
-    pago:document.getElementById('edit-pago').value,
-    estado:document.getElementById('edit-estado').value
-  };
+  if(!validarTel(tel)) return toast('Teléfono inválido');
+  const upd={nombre:document.getElementById('edit-nombre').value.trim(),tel,vendedor:document.getElementById('edit-vendedor').value.trim(),pago:document.getElementById('edit-pago').value,estado:document.getElementById('edit-estado').value};
   loading(true,'Guardando...');
-  try {
-    await sb.patch('boletos', upd, `?numero=eq.${num}`);
-    const b=boletos.find(x=>x.numero===num);
-    Object.assign(b, upd);
-    updateStats(); renderLista(); closeModalDirect();
-    toast('Boleto actualizado'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); setSyncStatus(false,'Error'); }
+  const {error}=await db.from('boletos').update(upd).eq('numero',num);
   loading(false);
+  if(error){toast('Error: '+error.message);return;}
+  const b=boletos.find(x=>x.numero===num);Object.assign(b,upd);
+  updateStats();renderLista();closeModalDirect();
+  toast('Boleto actualizado');setSyncStatus(true,'Sincronizado');
 }
-async function eliminar(num) {
-  if (!confirm('¿Eliminar boleto #'+num+'?')) return;
+async function eliminar(num){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  if(!confirm('¿Eliminar boleto #'+num+'?')) return;
   loading(true,'Eliminando...');
-  try {
-    await sb.delete('boletos', `?numero=eq.${num}`);
-    boletos=boletos.filter(x=>x.numero!==num);
-    updateStats(); renderLista(); closeModalDirect();
-    toast('Boleto eliminado'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); }
+  const {error}=await db.from('boletos').delete().eq('numero',num);
   loading(false);
+  if(error){toast('Error: '+error.message);return;}
+  boletos=boletos.filter(x=>x.numero!==num);
+  updateStats();renderLista();closeModalDirect();
+  toast('Boleto eliminado');setSyncStatus(true,'Sincronizado');
 }
 function closeModal(e){if(e.target===e.currentTarget)closeModalDirect();}
 function closeModalDirect(){document.getElementById('modal-detalle').classList.remove('open');}
@@ -821,17 +777,15 @@ function closeModalDirect(){document.getElementById('modal-detalle').classList.r
 // =====================================================================
 // CONFIG
 // =====================================================================
-function loadConfig() {
+function loadConfig(){
   document.getElementById('cfg-nombre').value=config.nombre||'';
   document.getElementById('cfg-premio').value=config.premio||'';
   document.getElementById('cfg-precio').value=config.precio||'';
   document.getElementById('cfg-total').value=config.total||'';
   document.getElementById('cfg-fecha').value=config.fecha||'';
-  document.getElementById('cfg-pass').value='';
 }
-async function guardarConfig() {
-  const np=document.getElementById('cfg-pass').value.trim();
-  if (np.length>0&&np.length<6) return toast('Contraseña mínimo 6 caracteres');
+async function guardarConfig(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   const upd={
     nombre:document.getElementById('cfg-nombre').value.trim()||config.nombre,
     premio:document.getElementById('cfg-premio').value.trim()||config.premio,
@@ -839,82 +793,72 @@ async function guardarConfig() {
     total:parseInt(document.getElementById('cfg-total').value)||config.total,
     fecha:document.getElementById('cfg-fecha').value,
   };
-  if (np.length>=6) upd.pass_hash = await hashPass(np);
   loading(true,'Guardando configuración...');
-  try {
-    await sb.patch('config', upd, '?id=eq.1');
-    Object.assign(config, upd);
-    updateHero(); updateStats();
-    toast(np.length>=6 ? 'Config y contraseña guardadas' : 'Configuración guardada');
-    setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); setSyncStatus(false,'Error'); }
+  const {error}=await db.from('config').update(upd).eq('id',1);
   loading(false);
+  if(error){toast('Error: '+error.message);return;}
+  Object.assign(config,upd);
+  updateHero();updateStats();
+  toast('Configuración guardada');setSyncStatus(true,'Sincronizado');
 }
-async function borrarTodo() {
-  if (!confirm('¿Borrar TODOS los boletos y el ganador? Esta acción no se puede deshacer.')) return;
+async function borrarTodo(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  if(!confirm('¿Borrar TODOS los boletos y el ganador?')) return;
   loading(true,'Borrando...');
-  try {
-    await sb.delete('boletos','?numero=gt.0');
-    await sb.patch('ganador',{numero:null,nombre:null,tel:null},'?id=eq.1');
-    boletos=[]; ganador=null;
-    updateStats(); renderLista();
-    document.getElementById('winner-card').classList.remove('show');
-    document.getElementById('drum-display').textContent='???';
-    document.getElementById('drum-display').className='drum-display';
-    document.getElementById('drum-sub').textContent='Pendiente de realizar';
-    document.getElementById('drum-sub').className='drum-sub';
-    toast('Datos borrados'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); }
+  await db.from('boletos').delete().gt('numero',0);
+  await db.from('ganador').update({numero:null,nombre:null,tel:null}).eq('id',1);
   loading(false);
+  boletos=[];ganador=null;
+  updateStats();renderLista();
+  document.getElementById('winner-card').classList.remove('show');
+  document.getElementById('drum-display').textContent='???';
+  document.getElementById('drum-display').className='drum-display';
+  document.getElementById('drum-sub').textContent='Pendiente de realizar';
+  document.getElementById('drum-sub').className='drum-sub';
+  toast('Datos borrados');setSyncStatus(true,'Sincronizado');
 }
 
 // =====================================================================
-// GALERÍA (local por dispositivo)
+// GALERÍA
 // =====================================================================
-// GALERÍA — URLs guardadas en Supabase, visibles para todos
-// =====================================================================
-async function agregarFoto() {
-  const url = document.getElementById('foto-url').value.trim();
-  if (!url) return toast('Pega el enlace de la foto');
-  if (!url.startsWith('http')) return toast('El enlace debe empezar con http');
-  loading(true, 'Guardando foto...');
-  try {
-    const res = await sb.post('fotos', { url, orden: imagenes.length });
-    const nueva = res && res.length ? res[0] : { id: Date.now(), url };
-    imagenes.push({ id: nueva.id, url });
-    document.getElementById('foto-url').value = '';
-    renderGaleriaAdmin(); renderGaleria();
-    toast('Foto agregada'); setSyncStatus(true, 'Sincronizado');
-  } catch(e) { toast('Error: ' + e.message); setSyncStatus(false, 'Error'); }
+async function agregarFoto(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  const url=document.getElementById('foto-url').value.trim();
+  if(!url) return toast('Pega el enlace de la foto');
+  if(!url.startsWith('http')) return toast('El enlace debe empezar con http');
+  loading(true,'Guardando foto...');
+  const {data,error}=await db.from('fotos').insert({url,orden:imagenes.length}).select();
   loading(false);
+  if(error){toast('Error: '+error.message);return;}
+  imagenes.push({id:data[0].id,url});
+  document.getElementById('foto-url').value='';
+  renderGaleriaAdmin();renderGaleria();
+  toast('Foto agregada');setSyncStatus(true,'Sincronizado');
 }
-function renderGaleria() {
-  const el = document.getElementById('galeria-publica');
-  const counter = document.getElementById('galeria-counter');
-  if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>'; counter.textContent=''; return; }
-  el.innerHTML = imagenes.map(f => `<img class="galeria-img" src="${esc(f.url)}" alt="Vehículo" onclick="openLightbox('${esc(f.url)}')">`).join('');
-  counter.textContent = imagenes.length + ' foto(s) · Toca para ampliar';
+function renderGaleria(){
+  const el=document.getElementById('galeria-publica');
+  const counter=document.getElementById('galeria-counter');
+  if(!imagenes.length){el.innerHTML='<div class="galeria-empty-single">Sin fotos disponibles aún</div>';counter.textContent='';return;}
+  el.innerHTML=imagenes.map(f=>`<img class="galeria-img" src="${esc(f.url)}" alt="Vehículo" onclick="openLightbox('${esc(f.url)}')" onerror="this.style.opacity='0.2'">`).join('');
+  counter.textContent=imagenes.length+' foto(s) · Toca para ampliar';
 }
-function renderGaleriaAdmin() {
-  const el = document.getElementById('galeria-admin-grid');
-  if (!imagenes.length) { el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>'; return; }
-  el.innerHTML = imagenes.map((f, i) => `
+function renderGaleriaAdmin(){
+  const el=document.getElementById('galeria-admin-grid');
+  if(!imagenes.length){el.innerHTML='<div class="galeria-empty-single">Sin fotos aún</div>';return;}
+  el.innerHTML=imagenes.map((f,i)=>`
     <div style="position:relative;">
-      <img class="galeria-img" src="${esc(f.url)}" alt="Foto ${i+1}" onclick="openLightbox('${esc(f.url)}')"
-        onerror="this.style.opacity='0.3';this.title='Enlace inválido'">
+      <img class="galeria-img" src="${esc(f.url)}" alt="Foto ${i+1}" onclick="openLightbox('${esc(f.url)}')" onerror="this.style.opacity='0.2'">
       <button onclick="eliminarFoto(${f.id})" style="position:absolute;top:4px;right:4px;background:rgba(245,90,90,0.9);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
     </div>`).join('');
 }
-async function eliminarFoto(id) {
-  if (!confirm('¿Eliminar esta foto?')) return;
-  loading(true, 'Eliminando...');
-  try {
-    await sb.delete('fotos', `?id=eq.${id}`);
-    imagenes = imagenes.filter(f => f.id !== id);
-    renderGaleriaAdmin(); renderGaleria(); toast('Foto eliminada');
-    setSyncStatus(true, 'Sincronizado');
-  } catch(e) { toast('Error: ' + e.message); }
+async function eliminarFoto(id){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  if(!confirm('¿Eliminar foto?')) return;
+  loading(true,'Eliminando...');
+  await db.from('fotos').delete().eq('id',id);
   loading(false);
+  imagenes=imagenes.filter(f=>f.id!==id);
+  renderGaleriaAdmin();renderGaleria();toast('Foto eliminada');
 }
 function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
@@ -922,39 +866,38 @@ function closeLightbox(){document.getElementById('lightbox').classList.remove('o
 // =====================================================================
 // FAQ
 // =====================================================================
-function loadContenido() {
+function loadContenido(){
   renderFaqAdmin();
   document.getElementById('proceso-editor').value=procesoTexto;
   document.getElementById('privacidad-editor').value=privacidadTexto;
 }
-async function agregarFaq() {
+async function agregarFaq(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   const p=document.getElementById('faq-nueva-p').value.trim();
   const r=document.getElementById('faq-nueva-r').value.trim();
-  if (!p||!r) return toast('Completa pregunta y respuesta');
-  loading(true,'Guardando pregunta...');
-  try {
-    const nueva=await sb.post('faqs',{pregunta:p,respuesta:r,orden:faqs.length});
-    faqs.push(nueva[0]||{pregunta:p,respuesta:r});
-    renderFaqAdmin(); renderFaqPublica();
-    document.getElementById('faq-nueva-p').value='';
-    document.getElementById('faq-nueva-r').value='';
-    toast('Pregunta agregada'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); }
+  if(!p||!r) return toast('Completa pregunta y respuesta');
+  loading(true,'Guardando...');
+  const {data,error}=await db.from('faqs').insert({pregunta:p,respuesta:r,orden:faqs.length}).select();
   loading(false);
+  if(error){toast('Error: '+error.message);return;}
+  faqs.push(data[0]);
+  renderFaqAdmin();renderFaqPublica();
+  document.getElementById('faq-nueva-p').value='';
+  document.getElementById('faq-nueva-r').value='';
+  toast('Pregunta agregada');setSyncStatus(true,'Sincronizado');
 }
-async function eliminarFaq(id) {
-  if (!confirm('¿Eliminar pregunta?')) return;
+async function eliminarFaq(id){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  if(!confirm('¿Eliminar pregunta?')) return;
   loading(true,'Eliminando...');
-  try {
-    await sb.delete('faqs',`?id=eq.${id}`);
-    faqs=faqs.filter(f=>f.id!==id);
-    renderFaqAdmin(); renderFaqPublica(); toast('Pregunta eliminada');
-  } catch(e) { toast('Error: '+e.message); }
+  await db.from('faqs').delete().eq('id',id);
   loading(false);
+  faqs=faqs.filter(f=>f.id!==id);
+  renderFaqAdmin();renderFaqPublica();toast('Pregunta eliminada');
 }
-function renderFaqAdmin() {
+function renderFaqAdmin(){
   const el=document.getElementById('faq-admin-lista');
-  if (!faqs.length) { el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Sin preguntas aún</div>'; return; }
+  if(!faqs.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Sin preguntas aún</div>';return;}
   el.innerHTML=faqs.map(f=>`
     <div class="faq-edit-row">
       <div style="font-size:13px;font-weight:500;">${esc(f.pregunta)}</div>
@@ -964,10 +907,10 @@ function renderFaqAdmin() {
       </div>
     </div>`).join('');
 }
-function renderFaqPublica() {
+function renderFaqPublica(){
   const el=document.getElementById('faq-lista-publica');
   const empty=document.getElementById('faq-empty');
-  if (!faqs.length) { el.innerHTML=''; empty.style.display='block'; return; }
+  if(!faqs.length){el.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   el.innerHTML=faqs.map((f,i)=>`
     <div class="faq-item" id="faq-${i}">
@@ -982,88 +925,80 @@ function toggleFaq(i){document.getElementById('faq-'+i).classList.toggle('open')
 // =====================================================================
 // PROCESO Y PRIVACIDAD
 // =====================================================================
-async function guardarProceso() {
+async function guardarProceso(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   procesoTexto=document.getElementById('proceso-editor').value;
   loading(true,'Guardando...');
-  try {
-    await sb.patch('contenido',{proceso:procesoTexto},'?id=eq.1');
-    renderProceso(); toast('Texto guardado'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); }
+  await db.from('contenido').update({proceso:procesoTexto}).eq('id',1);
   loading(false);
+  renderProceso();toast('Texto guardado');setSyncStatus(true,'Sincronizado');
 }
-function renderProceso() {
-  document.getElementById('proceso-publico').textContent=procesoTexto||'El administrador publicará esta información próximamente.';
-}
-async function guardarPrivacidad() {
+function renderProceso(){document.getElementById('proceso-publico').textContent=procesoTexto||'El administrador publicará esta información próximamente.';}
+async function guardarPrivacidad(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   privacidadTexto=document.getElementById('privacidad-editor').value;
   loading(true,'Guardando...');
-  try {
-    await sb.patch('contenido',{privacidad:privacidadTexto},'?id=eq.1');
-    renderPrivacidad(); toast('Aviso guardado'); setSyncStatus(true,'Sincronizado');
-  } catch(e) { toast('Error: '+e.message); }
+  await db.from('contenido').update({privacidad:privacidadTexto}).eq('id',1);
   loading(false);
+  renderPrivacidad();toast('Aviso guardado');setSyncStatus(true,'Sincronizado');
 }
-function renderPrivacidad() {
-  document.getElementById('privacidad-texto').textContent=privacidadTexto||'El aviso de privacidad será publicado próximamente.';
-}
+function renderPrivacidad(){document.getElementById('privacidad-texto').textContent=privacidadTexto||'El aviso de privacidad será publicado próximamente.';}
 
 // =====================================================================
-// BOLETO COMPRADOR
+// BOLETO COMPRADOR (lectura pública)
 // =====================================================================
-async function buscarBoleto() {
+async function buscarBoleto(){
   const num=parseInt(document.getElementById('buscar-num').value);
   const nombreInput=document.getElementById('buscar-nombre').value;
   const hint=document.getElementById('hint-box');
   const el=document.getElementById('boleto-result');
-  if (!num||!nombreInput.trim()) { hint.classList.remove('show'); el.innerHTML=''; return toast('Completa número y nombre'); }
+  if(!num||!nombreInput.trim()){hint.classList.remove('show');el.innerHTML='';return toast('Completa número y nombre');}
   loading(true,'Buscando...');
-  try {
-    const res=await sb.get('boletos',`?numero=eq.${num}`);
-    loading(false);
-    const b=res&&res.length?res[0]:null;
-    if (!b||normalizar(b.nombre)!==normalizar(nombreInput)) { hint.classList.add('show'); el.innerHTML=''; return; }
-    hint.classList.remove('show');
-    const fechaSorteo=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}):'Por definir';
-    const wrap=document.createElement('div');
-    wrap.innerHTML=`
-      <div class="ticket-wrap">
-        <div class="ticket-header">
-          <div class="ticket-event"></div><div class="ticket-title"></div><div class="ticket-date"></div>
-        </div>
-        <div class="ticket-divider"></div>
-        <div class="ticket-body">
-          <div class="ticket-num-label">Número de boleto</div>
-          <div class="ticket-num" id="t-num"></div>
-          <div class="ticket-holder" id="t-holder"></div>
-          <div class="qr-container" id="qr-box-${b.numero}"></div>
-          <div><span class="ticket-status"><span style="width:6px;height:6px;background:var(--accent2);border-radius:50%;display:inline-block;"></span><span id="t-estado"></span></span></div>
-        </div>
-        <div class="ticket-footer">
-          <div><div class="ticket-footer-lbl">Pago</div><div class="ticket-footer-val" id="t-pago"></div></div>
-          <div><div class="ticket-footer-lbl">Precio</div><div class="ticket-footer-val" id="t-precio"></div></div>
-          <div><div class="ticket-footer-lbl">Sorteo</div><div class="ticket-footer-val" id="t-fecha"></div></div>
-        </div>
-      </div>`;
-    wrap.querySelector('.ticket-event').textContent=config.nombre;
-    wrap.querySelector('.ticket-title').textContent=config.premio;
-    wrap.querySelector('.ticket-date').textContent='Sorteo: '+fechaSorteo;
-    wrap.querySelector('#t-num').textContent=String(b.numero).padStart(3,'0');
-    wrap.querySelector('#t-holder').textContent=b.nombre;
-    wrap.querySelector('#t-estado').textContent=b.estado;
-    wrap.querySelector('#t-pago').textContent=b.pago;
-    wrap.querySelector('#t-precio').textContent='$'+Number(config.precio).toLocaleString('es-MX');
-    wrap.querySelector('#t-fecha').textContent=fechaSorteo;
-    const btn=document.createElement('button');
-    btn.className='btn btn-success'; btn.textContent='Compartir por WhatsApp';
-    btn.onclick=()=>compartirBoleto(b);
-    el.innerHTML=''; el.appendChild(wrap); el.appendChild(btn);
-    setTimeout(()=>{
-      const qrEl=document.getElementById('qr-box-'+b.numero);
-      if (qrEl&&typeof QRCode!=='undefined') new QRCode(qrEl,{text:`Boleto ${b.numero} - ${b.nombre} - ${config.nombre}`,width:80,height:80,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
-    },100);
-  } catch(e) { loading(false); toast('Error de conexión'); }
+  const {data}=await db.from('boletos').select('*').eq('numero',num);
+  loading(false);
+  const b=data&&data.length?data[0]:null;
+  if(!b||normalizar(b.nombre)!==normalizar(nombreInput)){hint.classList.add('show');el.innerHTML='';return;}
+  hint.classList.remove('show');
+  const fechaSorteo=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}):'Por definir';
+  const wrap=document.createElement('div');
+  wrap.innerHTML=`
+    <div class="ticket-wrap">
+      <div class="ticket-header">
+        <div class="ticket-event"></div><div class="ticket-title"></div><div class="ticket-date"></div>
+      </div>
+      <div class="ticket-divider"></div>
+      <div class="ticket-body">
+        <div class="ticket-num-label">Número de boleto</div>
+        <div class="ticket-num" id="t-num"></div>
+        <div class="ticket-holder" id="t-holder"></div>
+        <div class="qr-container" id="qr-box-${b.numero}"></div>
+        <div><span class="ticket-status"><span style="width:6px;height:6px;background:var(--accent2);border-radius:50%;display:inline-block;"></span><span id="t-estado"></span></span></div>
+      </div>
+      <div class="ticket-footer">
+        <div><div class="ticket-footer-lbl">Pago</div><div class="ticket-footer-val" id="t-pago"></div></div>
+        <div><div class="ticket-footer-lbl">Precio</div><div class="ticket-footer-val" id="t-precio"></div></div>
+        <div><div class="ticket-footer-lbl">Sorteo</div><div class="ticket-footer-val" id="t-fecha"></div></div>
+      </div>
+    </div>`;
+  wrap.querySelector('.ticket-event').textContent=config.nombre;
+  wrap.querySelector('.ticket-title').textContent=config.premio;
+  wrap.querySelector('.ticket-date').textContent='Sorteo: '+fechaSorteo;
+  wrap.querySelector('#t-num').textContent=String(b.numero).padStart(3,'0');
+  wrap.querySelector('#t-holder').textContent=b.nombre;
+  wrap.querySelector('#t-estado').textContent=b.estado;
+  wrap.querySelector('#t-pago').textContent=b.pago;
+  wrap.querySelector('#t-precio').textContent='$'+Number(config.precio).toLocaleString('es-MX');
+  wrap.querySelector('#t-fecha').textContent=fechaSorteo;
+  const btn=document.createElement('button');
+  btn.className='btn btn-success';btn.textContent='Compartir por WhatsApp';
+  btn.onclick=()=>compartirBoleto(b);
+  el.innerHTML='';el.appendChild(wrap);el.appendChild(btn);
+  setTimeout(()=>{
+    const qrEl=document.getElementById('qr-box-'+b.numero);
+    if(qrEl&&typeof QRCode!=='undefined') new QRCode(qrEl,{text:`Boleto ${b.numero} - ${b.nombre} - ${config.nombre}`,width:80,height:80,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  },100);
 }
-function compartirBoleto(b) {
+function compartirBoleto(b){
   const fechaS=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}):'por confirmar';
   const msg=`🎟 *${config.nombre}*\n\nBoleto: *${String(b.numero).padStart(3,'0')}*\nNombre: ${b.nombre}\nPremio: ${config.premio}\nSorteo: ${fechaS}\nEstado: ${b.estado}\n\n¡Mucha suerte! 🍀`;
   window.open('https://wa.me/?text='+encodeURIComponent(msg));
@@ -1072,12 +1007,12 @@ function compartirBoleto(b) {
 // =====================================================================
 // SORTEO
 // =====================================================================
-function updateSorteoInfo() {
+function updateSorteoInfo(){
   const pagados=boletos.filter(b=>b.estado==='Pagado').length;
   document.getElementById('s-participantes').textContent=pagados;
   document.getElementById('s-premio').textContent=config.premio||'—';
   document.getElementById('s-fecha').textContent=config.fecha?new Date(config.fecha).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'—';
-  if (ganador&&ganador.numero) {
+  if(ganador&&ganador.numero){
     document.getElementById('drum-display').textContent=String(ganador.numero).padStart(3,'0');
     document.getElementById('drum-display').className='drum-display winner';
     document.getElementById('drum-sub').textContent=ganador.nombre||'';
@@ -1089,43 +1024,42 @@ function updateSorteoInfo() {
   }
 }
 let countdownInterval;
-function startCountdown() {
-  if (countdownInterval) clearInterval(countdownInterval);
-  function tick() {
-    if (!config.fecha) { ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='--'); return; }
+function startCountdown(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  function tick(){
+    if(!config.fecha){['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='--');return;}
     const diff=new Date(config.fecha)-new Date();
-    if (diff<=0) { ['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='00'); return; }
+    if(diff<=0){['cd-dias','cd-hrs','cd-min','cd-seg'].forEach(id=>document.getElementById(id).textContent='00');return;}
     document.getElementById('cd-dias').textContent=String(Math.floor(diff/86400000)).padStart(2,'0');
     document.getElementById('cd-hrs').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
     document.getElementById('cd-min').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
     document.getElementById('cd-seg').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
   }
-  tick(); countdownInterval=setInterval(tick,1000);
+  tick();countdownInterval=setInterval(tick,1000);
 }
-async function realizarSorteo() {
+async function realizarSorteo(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
   const pagados=boletos.filter(b=>b.estado==='Pagado');
-  if (!pagados.length) return toast('No hay boletos con estado Pagado');
-  if (ganador&&ganador.numero&&!confirm('Ya existe un ganador. ¿Nuevo sorteo?')) return;
+  if(!pagados.length) return toast('No hay boletos con estado Pagado');
+  if(ganador&&ganador.numero&&!confirm('Ya existe un ganador. ¿Nuevo sorteo?')) return;
   const winner=pagados[Math.floor(Math.random()*pagados.length)];
   const drum=document.getElementById('drum-display');
   const sub=document.getElementById('drum-sub');
-  drum.className='drum-display spinning'; sub.textContent='Sorteando...'; sub.className='drum-sub';
+  drum.className='drum-display spinning';sub.textContent='Sorteando...';sub.className='drum-sub';
   document.getElementById('winner-card').classList.remove('show');
   document.getElementById('btn-sorteo').disabled=true;
   let i=0;
   const decoy=pagados.filter(b=>b.numero!==winner.numero);
   const pool=decoy.length>0?decoy:pagados;
   const iv=setInterval(async()=>{
-    if (i<28) drum.textContent=String(pool[Math.floor(Math.random()*pool.length)].numero).padStart(3,'0');
-    else if (i===28) drum.textContent='...';
-    else if (i>=30) {
+    if(i<28) drum.textContent=String(pool[Math.floor(Math.random()*pool.length)].numero).padStart(3,'0');
+    else if(i===28) drum.textContent='...';
+    else if(i>=30){
       clearInterval(iv);
-      try {
-        await sb.patch('ganador',{numero:winner.numero,nombre:winner.nombre,tel:winner.tel},'?id=eq.1');
-        ganador=winner;
-      } catch(e) { toast('Advertencia: ganador no guardado en servidor'); ganador=winner; }
+      await db.from('ganador').update({numero:winner.numero,nombre:winner.nombre,tel:winner.tel}).eq('id',1);
+      ganador=winner;
       drum.textContent=String(winner.numero).padStart(3,'0');
-      drum.className='drum-display winner'; sub.textContent=winner.nombre; sub.className='drum-sub winner-name';
+      drum.className='drum-display winner';sub.textContent=winner.nombre;sub.className='drum-sub winner-name';
       document.getElementById('w-num').textContent=String(winner.numero).padStart(3,'0');
       document.getElementById('w-name').textContent=winner.nombre;
       document.getElementById('w-tel').textContent=winner.tel;
@@ -1136,26 +1070,28 @@ async function realizarSorteo() {
     i++;
   },80);
 }
-async function resetSorteo() {
-  if (!confirm('¿Reiniciar resultado del sorteo?')) return;
+async function resetSorteo(){
+  if(!sesionAdmin) return toast('Sesión expirada.');
+  if(!confirm('¿Reiniciar resultado del sorteo?')) return;
   loading(true,'Reiniciando...');
-  try {
-    await sb.patch('ganador',{numero:null,nombre:null,tel:null},'?id=eq.1');
-    ganador=null;
-    document.getElementById('drum-display').textContent='???';
-    document.getElementById('drum-display').className='drum-display';
-    document.getElementById('drum-sub').textContent='Pendiente de realizar';
-    document.getElementById('drum-sub').className='drum-sub';
-    document.getElementById('winner-card').classList.remove('show');
-    toast('Sorteo reiniciado');
-  } catch(e) { toast('Error: '+e.message); }
+  await db.from('ganador').update({numero:null,nombre:null,tel:null}).eq('id',1);
   loading(false);
+  ganador=null;
+  document.getElementById('drum-display').textContent='???';
+  document.getElementById('drum-display').className='drum-display';
+  document.getElementById('drum-sub').textContent='Pendiente de realizar';
+  document.getElementById('drum-sub').className='drum-sub';
+  document.getElementById('winner-card').classList.remove('show');
+  toast('Sorteo reiniciado');
 }
 
 // =====================================================================
 // INIT
 // =====================================================================
-recargarTodo();
+(async()=>{
+  await verificarSesion(); // restaurar sesión si el admin ya había iniciado
+  await recargarTodo();
+})();
 </script>
 </body>
 </html>
